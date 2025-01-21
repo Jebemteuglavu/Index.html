@@ -1,0 +1,223 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    h1 {
+        color: #333;
+        text-align: center;
+    }
+    .money-display {
+        font-size: 24px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .item-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    .item {
+        background-color: white;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .item-icon {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 40px;
+        background-color: #f0f0f0;
+        border-radius: 50%;
+    }
+    .item h3 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+    }
+    .item p {
+        margin: 0 0 10px 0;
+        font-weight: bold;
+    }
+    .item-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+    }
+    .item-controls button {
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        padding: 5px 10px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+    .item-controls button:hover {
+        background-color: #45a049;
+    }
+    .item-controls button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+    }
+    .item-controls input {
+        width: 50px;
+        text-align: center;
+        font-size: 14px;
+    }
+    .footer {
+        text-align: center;
+        margin-top: 20px;
+        font-style: italic;
+        color: #666;
+    }
+    .total-cost {
+        font-size: 14px;
+        color: #666;
+        margin-top: 5px;
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1>Spend Elon Musk's Money</h1>
+        <div class="money-display">
+            Remaining: $<span id="money">200000000000</span>
+        </div>
+        <div class="item-grid" id="itemGrid"></div>
+        <div class="footer">Inspired by "Spend Bill Gates' Money"</div>
+    </div>
+
+    <script>
+        const items = [
+            { name: "Cheeseburger", price: 5, icon: "🍔" },
+            { name: "Video Game", price: 60, icon: "🎮" },
+            { name: "Tesla Model S", price: 79990, icon: "🚗" },
+            { name: "SpaceX Rocket Launch", price: 62000000, icon: "🚀" },
+            { name: "Private Island", price: 50000000, icon: "🏝️" },
+            { name: "Superyacht", price: 300000000, icon: "⛵" },
+            { name: "Luxury Watch", price: 50000, icon: "⌚" },
+            { name: "Designer Handbag", price: 5000, icon: "👜" },
+            { name: "Private Jet", price: 65000000, icon: "✈️" },
+            { name: "Mansion", price: 20000000, icon: "🏰" },
+            { name: "Sports Team", price: 2000000000, icon: "🏆" },
+            { name: "Hollywood Movie Budget", price: 200000000, icon: "🎬" },
+            { name: "Skyscraper", price: 1000000000, icon: "🏙️" },
+            { name: "Luxury Hotel", price: 500000000, icon: "🏨" },
+            { name: "Private Concert", price: 1000000, icon: "🎸" },
+            { name: "Supercomputer", price: 100000000, icon: "🖥️" },
+            { name: "Space Tourism Trip", price: 55000000, icon: "👨‍🚀" },
+            { name: "Formula 1 Team", price: 700000000, icon: "🏎️" },
+            { name: "Helicopter", price: 5000000, icon: "🚁" },
+            { name: "Tropical Resort", price: 150000000, icon: "🌴" },
+            { name: "Submarine", price: 30000000, icon: "🌊" },
+            { name: "Art Masterpiece", price: 450000000, icon: "🎨" },
+            { name: "Diamond Necklace", price: 20000000, icon: "💎" },
+            { name: "Tech Startup", price: 100000000, icon: "💻" },
+            { name: "Dinosaur Fossil", price: 8000000, icon: "🦕" },
+            { name: "The Moon", price: 999999999999999, icon: "🌕" }
+        ];
+
+        let money = 200000000000; // Elon Musk's net worth (approx.)
+        const moneyDisplay = document.getElementById('money');
+        const itemGrid = document.getElementById('itemGrid');
+
+        function updateMoneyDisplay() {
+            moneyDisplay.textContent = money.toLocaleString();
+        }
+
+        function calculateTotalCost(item, quantity) {
+            return item.price * quantity;
+        }
+
+        function buyItem(item, quantity) {
+            const totalCost = calculateTotalCost(item, quantity);
+            if (money >= totalCost) {
+                money -= totalCost;
+                updateMoneyDisplay();
+                return true;
+            } else {
+                alert("Not enough money!");
+                return false;
+            }
+        }
+
+        function sellItem(item, quantity) {
+            const totalCost = calculateTotalCost(item, quantity);
+            money += totalCost;
+            updateMoneyDisplay();
+        }
+
+        function createItemElement(item) {
+            const itemElement = document.createElement('div');
+            itemElement.className = 'item';
+            itemElement.innerHTML = `
+                <div class="item-icon">${item.icon}</div>
+                <h3>${item.name}</h3>
+                <p>$${item.price.toLocaleString()} each</p>
+                <div class="item-controls">
+                    <button onclick="changeQuantity('${item.name}', -1)">-</button>
+                    <input type="number" id="${item.name}-quantity" value="0" min="0" onchange="updateQuantity('${item.name}')">
+                    <button onclick="changeQuantity('${item.name}', 1)">+</button>
+                </div>
+                <div class="total-cost" id="${item.name}-total-cost">Total: $0</div>
+            `;
+            return itemElement;
+        }
+
+        function changeQuantity(itemName, change) {
+            const quantityInput = document.getElementById(`${itemName}-quantity`);
+            const newQuantity = Math.max(0, parseInt(quantityInput.value) + change);
+            quantityInput.value = newQuantity;
+            updateQuantity(itemName);
+        }
+
+        function updateQuantity(itemName) {
+            const item = items.find(i => i.name === itemName);
+            const quantityInput = document.getElementById(`${itemName}-quantity`);
+            const totalCostElement = document.getElementById(`${itemName}-total-cost`);
+            const newQuantity = parseInt(quantityInput.value);
+            const oldQuantity = parseInt(quantityInput.dataset.lastValue || 0);
+
+            if (newQuantity > oldQuantity) {
+                const quantityToBuy = newQuantity - oldQuantity;
+                if (!buyItem(item, quantityToBuy)) {
+                    quantityInput.value = oldQuantity;
+                    return;
+                }
+            } else if (newQuantity < oldQuantity) {
+                const quantityToSell = oldQuantity - newQuantity;
+                sellItem(item, quantityToSell);
+            }
+
+            quantityInput.dataset.lastValue = newQuantity;
+            const totalCost = calculateTotalCost(item, newQuantity);
+            totalCostElement.textContent = `Total: $${totalCost.toLocaleString()}`;
+        }
+
+        items.forEach(item => {
+            const itemElement = createItemElement(item);
+            itemGrid.appendChild(itemElement);
+        });
+
+        updateMoneyDisplay();
+    </script>
+</body>
+</html>
