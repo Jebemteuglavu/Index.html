@@ -1,0 +1,328 @@
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCHAWANNA LEE'S Election 2024 Approval Tracker</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+            padding: 20px;
+        }
+        header {
+            background: linear-gradient(to right, #3c3b6e, #b22234);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+        }
+        h1, h2 {
+            margin: 0;
+        }
+        .candidate-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+        .candidate {
+            background: #ffffff;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            flex: 1;
+        }
+        .candidate h2 {
+            color: #3c3b6e;
+        }
+        .approval-bar {
+            background: #ddd;
+            height: 20px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .approval-fill {
+            height: 100%;
+            width: 50%;
+            background: #4CAF50;
+            transition: width 0.5s ease-in-out;
+        }
+        .disapproval-fill {
+            height: 100%;
+            width: 50%;
+            background: #f44336;
+            transition: width 0.5s ease-in-out;
+        }
+        button {
+            background: #3c3b6e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin: 5px;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #b22234;
+        }
+        #live-feed {
+            background: white;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        #feed-content {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .candidate-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+        #voice-approval, #video-approval {
+            background: #ffffff;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+        #recordButton, #videoRecordButton {
+            font-size: 18px;
+        }
+        #recordButton {
+            background-color: #4CAF50;
+        }
+        #videoRecordButton {
+            background: linear-gradient(to right, #4CAF50, #000000);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+        #videoRecordButton:hover {
+            background: linear-gradient(to right, #45a049, #333333);
+        }
+        #recordButton.recording, #videoRecordButton.recording {
+            background: linear-gradient(to right, #f44336, #000000);
+        }
+        #audioPlayback, #videoPlayback {
+            margin-top: 10px;
+            max-width: 100%;
+        }
+        #videoPreview {
+            max-width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>SCHAWANNA LEE'S Election 2024 Approval Tracker</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <p>Welcome to Schawanna Lee's real-time approval tracker for the 2024 Presidential Election. Express your approval or disapproval for each candidate, see live results, and record your voice or video message!</p>
+        
+        <div class="candidate-container">
+            <div class="candidate">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Kamala_Harris_US_Senate_Portrait.jpg/800px-Kamala_Harris_US_Senate_Portrait.jpg" alt="Kamala Harris portrait" class="candidate-image">
+                <h2>Kamala Harris</h2>
+                <div class="approval-bar">
+                    <div class="approval-fill" id="harris-approval"></div>
+                </div>
+                <div class="approval-bar">
+                    <div class="disapproval-fill" id="harris-disapproval"></div>
+                </div>
+                <button onclick="vote('harris', 'approve')">Approve</button>
+                <button onclick="vote('harris', 'disapprove')">Disapprove</button>
+                <p>Approval: <span id="harris-approval-text">50%</span></p>
+                <p>Disapproval: <span id="harris-disapproval-text">50%</span></p>
+            </div>
+
+            <div class="candidate">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Donald_Trump_official_portrait.jpg/800px-Donald_Trump_official_portrait.jpg" alt="Donald Trump portrait" class="candidate-image">
+                <h2>Donald Trump</h2>
+                <div class="approval-bar">
+                    <div class="approval-fill" id="trump-approval"></div>
+                </div>
+                <div class="approval-bar">
+                    <div class="disapproval-fill" id="trump-disapproval"></div>
+                </div>
+                <button onclick="vote('trump', 'approve')">Approve</button>
+                <button onclick="vote('trump', 'disapprove')">Disapprove</button>
+                <p>Approval: <span id="trump-approval-text">50%</span></p>
+                <p>Disapproval: <span id="trump-disapproval-text">50%</span></p>
+            </div>
+        </div>
+
+        <div id="voice-approval">
+            <h2>Record Your Voice Approval</h2>
+            <p>Click the button below to start/stop recording your voice message:</p>
+            <button id="recordButton">Start Recording</button>
+            <audio id="audioPlayback" controls style="display: none;"></audio>
+        </div>
+
+        <div id="video-approval">
+            <h2>Record Your Video Approval</h2>
+            <p>Click the button below to start/stop recording your video message:</p>
+            <button id="videoRecordButton">Start Video Recording</button>
+            <video id="videoPreview" style="display: none;" width="400" height="300" autoplay muted></video>
+            <video id="videoPlayback" controls style="display: none;" width="400" height="300"></video>
+        </div>
+
+        <section id="live-feed">
+            <h2>Live Feed</h2>
+            <div id="feed-content">
+                <!-- Live feed content will be dynamically inserted here -->
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const candidates = {
+            harris: { approval: 50, disapproval: 50 },
+            trump: { approval: 50, disapproval: 50 }
+        };
+
+        function vote(candidate, type) {
+            if (type === 'approve') {
+                candidates[candidate].approval++;
+                candidates[candidate].disapproval = Math.max(0, candidates[candidate].disapproval - 1);
+            } else {
+                candidates[candidate].disapproval++;
+                candidates[candidate].approval = Math.max(0, candidates[candidate].approval - 1);
+            }
+            updateDisplay(candidate);
+            addToFeed(candidate, type);
+        }
+
+        function updateDisplay(candidate) {
+            const total = candidates[candidate].approval + candidates[candidate].disapproval;
+            const approvalPercentage = (candidates[candidate].approval / total) * 100;
+            const disapprovalPercentage = (candidates[candidate].disapproval / total) * 100;
+
+            document.getElementById(`${candidate}-approval`).style.width = `${approvalPercentage}%`;
+            document.getElementById(`${candidate}-disapproval`).style.width = `${disapprovalPercentage}%`;
+            document.getElementById(`${candidate}-approval-text`).textContent = `${approvalPercentage.toFixed(1)}%`;
+            document.getElementById(`${candidate}-disapproval-text`).textContent = `${disapprovalPercentage.toFixed(1)}%`;
+        }
+
+        function addToFeed(candidate, type) {
+            const feed = document.getElementById('feed-content');
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            const newEntry = document.createElement('p');
+            const candidateName = candidate === 'harris' ? 'Kamala Harris' : 'Donald Trump';
+            newEntry.textContent = `${timeString}: A voter ${type}d ${candidateName}.`;
+            feed.insertBefore(newEntry, feed.firstChild);
+
+            if (feed.children.length > 5) {
+                feed.removeChild(feed.lastChild);
+            }
+        }
+
+        // Voice recording functionality
+        let mediaRecorder;
+        let audioChunks = [];
+        const recordButton = document.getElementById('recordButton');
+        const audioPlayback = document.getElementById('audioPlayback');
+
+        recordButton.onclick = () => {
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+                recordButton.textContent = "Start Recording";
+                recordButton.classList.remove("recording");
+            } else {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        mediaRecorder = new MediaRecorder(stream);
+                        mediaRecorder.start();
+
+                        audioChunks = [];
+                        mediaRecorder.addEventListener("dataavailable", event => {
+                            audioChunks.push(event.data);
+                        });
+
+                        mediaRecorder.addEventListener("stop", () => {
+                            const audioBlob = new Blob(audioChunks);
+                            const audioUrl = URL.createObjectURL(audioBlob);
+                            audioPlayback.src = audioUrl;
+                            audioPlayback.style.display = "block";
+                        });
+
+                        recordButton.textContent = "Stop Recording";
+                        recordButton.classList.add("recording");
+                    });
+            }
+        };
+
+        // Video recording functionality
+        let videoRecorder;
+        let videoChunks = [];
+        const videoRecordButton = document.getElementById('videoRecordButton');
+        const videoPreview = document.getElementById('videoPreview');
+        const videoPlayback = document.getElementById('videoPlayback');
+        let videoStream;
+
+        videoRecordButton.onclick = () => {
+            if (videoRecorder && videoRecorder.state === "recording") {
+                videoRecorder.stop();
+                videoRecordButton.textContent = "Start Video Recording";
+                videoRecordButton.classList.remove("recording");
+                videoStream.getTracks().forEach(track => track.stop());
+                videoPreview.style.display = "none";
+            } else {
+                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                    .then(stream => {
+                        videoStream = stream;
+                        videoPreview.srcObject = stream;
+                        videoPreview.style.display = "block";
+                        
+                        videoRecorder = new MediaRecorder(stream);
+                        videoRecorder.start();
+
+                        videoChunks = [];
+                        videoRecorder.addEventListener("dataavailable", event => {
+                            videoChunks.push(event.data);
+                        });
+
+                        videoRecorder.addEventListener("stop", () => {
+                            const videoBlob = new Blob(videoChunks, { type: 'video/webm' });
+                            const videoUrl = URL.createObjectURL(videoBlob);
+                            videoPlayback.src = videoUrl;
+                            videoPlayback.style.display = "block";
+                        });
+
+                        videoRecordButton.textContent = "Stop Video Recording";
+                        videoRecordButton.classList.add("recording");
+                    });
+            }
+        };
+
+        // Simulate some random voting activity
+        setInterval(() => {
+            const candidateNames = Object.keys(candidates);
+            const randomCandidate = candidateNames[Math.floor(Math.random() * candidateNames.length)];
+            const randomVote = Math.random() > 0.5 ? 'approve' : 'disapprove';
+            vote(randomCandidate, randomVote);
+        }, 5000);
+    </script>
+</body></html>
