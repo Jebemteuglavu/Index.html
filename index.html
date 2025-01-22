@@ -1,0 +1,1757 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Psychedelic Space Insect Shooter 3D</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+<style>
+    body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Arial Black', sans-serif; }
+    canvas { display: block; }
+    #hud {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: #fff;
+        font-size: 20px;
+        text-shadow: 0 0 5px #ff00ff, 0 0 10px #00ffff, 0 0 15px #ffff00;
+    }
+    #lives {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 28px;
+    }
+    #crosshair {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255,255,255,0.8);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        box-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffff, 0 0 30px #ffff00;
+    }
+    #gameOver {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: #fff;
+        font-size: 36px;
+        text-shadow: 0 0 5px #ff00ff, 0 0 10px #00ffff, 0 0 15px #ffff00;
+    }
+    #ouchMessage {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 18vw;
+        color: red;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.05s ease-in-out;
+    }
+    #pauseIcon {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    #pauseIcon::after {
+        content: "⏸️";
+        font-size: 15vw;
+        color: white;
+    }
+    #timer {
+        position: absolute;
+        top: 40px;
+        left: 10px;
+        color: #fff;
+        font-size: 20px;
+        text-shadow: 0 0 5px #ff00ff, 0 0 10px #00ffff, 0 0 15px #ffff00;
+    }
+    #countdown {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 72px;
+        color: #fff;
+        text-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffff, 0 0 30px #ffff00;
+        display: none;
+    }
+    #instructions {
+        position: fixed;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #fff;
+        font-size: 14px;
+        text-align: center;
+        text-shadow: 0 0 5px #ff00ff, 0 0 10px #00ffff;
+        padding: 10px;
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: 10px;
+        pointer-events: none;
+        z-index: 100;
+        width: 80%;
+        max-width: 800px;
+    }
+    #instructions kbd {
+        background-color: rgba(255, 255, 255, 0.2);
+        padding: 2px 6px;
+        border-radius: 3px;
+        margin: 0 2px;
+    }
+</style>
+</head>
+<body>
+<div id="hud">Score: <span id="score">0</span></div>
+<div id="timer">Time: 00:00</div>
+<div id="lives">❤️❤️❤️</div>
+<div id="crosshair"></div>
+<div id="ouchMessage">OUCH!</div>
+<div id="pauseIcon"></div>
+<div id="countdown"></div>
+<div id="instructions">
+    <strong>Controls:</strong> 
+    Move with <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> | 
+    Aim with <strong>Mouse</strong> | 
+    Shoot with <kbd>Space</kbd> | 
+    Pause with <kbd>P</kbd> | 
+    Hit UFOs 5 times to destroy them | 
+    Avoid collisions with enemies and planet explosions
+</div>
+<script>
+let scene, camera, renderer, starField, planets = [], insects = [], lasers = [], ufoProjectiles = [];
+const MAX_ENEMIES = 100;
+let planetHealth = new Array(5).fill(30);
+let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+let velocity = new THREE.Vector3();
+let acceleration = new THREE.Vector3();
+const maxSpeed = 400.0 / 1.5 * 0.8;
+const accelerationRate = 1000.0 / 1.5 * 0.8;
+const friction = 0.95;
+let prevTime = performance.now();
+let score = 0;
+let lives = 3;
+let audioContext, insectScreamBuffer, wilhelmScreamBuffer;
+let explosions = [];
+let playerHealth = 100;
+let isGameOver = false;
+let playerQuaternion = new THREE.Quaternion();
+let rotationMatrix = new THREE.Matrix4();
+let lastFanfareScore = 0;
+const UFO_STOP_TIME = 2000; 
+const UFO_SPEED = 5; 
+let isPaused = false;
+const pauseIcon = document.getElementById('pauseIcon');
+let cometStartTime = null;
+let cometsActive = false;
+let startTime = Date.now();
+let elapsedTime = 0;
+let isCountingDown = false;
+let countdownTime = 3;
+
+function formatTime(milliseconds) {
+    const seconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+function speakRobotic(text) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.8;
+    utterance.pitch = 0.5;
+    utterance.voice = speechSynthesis.getVoices().find(voice => voice.name.includes('Zarvox')) || speechSynthesis.getVoices()[0];
+    speechSynthesis.speak(utterance);
+}
+
+function startCountdown(callback) {
+    isCountingDown = true;
+    countdownTime = 3;
+    const countdownElement = document.getElementById('countdown');
+    countdownElement.style.display = 'block';
+
+    function updateCountdown() {
+        if (countdownTime > 0) {
+            countdownElement.textContent = countdownTime;
+            speakRobotic(countdownTime.toString());
+            countdownTime--;
+            setTimeout(updateCountdown, 1000);
+        } else {
+            countdownElement.style.display = 'none';
+            isCountingDown = false;
+            speakRobotic("Go");
+            if (callback) callback();
+        }
+    }
+
+    updateCountdown();
+}
+
+function init() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 5;
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const bgGeometry = new THREE.SphereGeometry(500, 60, 40);
+    const bgMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+            time: { value: 0 }
+        },
+        vertexShader: `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `,
+        fragmentShader: `
+            uniform float time;
+            varying vec2 vUv;
+            void main() {
+                vec2 p = -1.0 + 2.0 * vUv;
+                float a = time * 40.0;
+                float d, e, f, g = 1.0 / 40.0, h, i, r, q;
+                e = 400.0 * (p.x * 0.5 + 0.5);
+                f = 400.0 * (p.y * 0.5 + 0.5);
+                i = 200.0 + sin(e * g + a / 150.0) * 20.0;
+                d = 200.0 + cos(f * g / 2.0) * 18.0 + cos(e * g) * 7.0;
+                r = sqrt(pow(abs(i - e), 2.0) + pow(abs(d - f), 2.0));
+                q = f / r;
+                e = (r * cos(q)) - a / 2.0;
+                f = (r * sin(q)) - a / 2.0;
+                d = sin(e * g) * 176.0 + sin(e * g) * 164.0 + r;
+                h = ((f + d) + a / 2.0) * g;
+                i = cos(h + r * p.x / 1.3) * (e + e + a) + cos(q * g * 6.0) * (r + h / 3.0);
+                h = sin(f * g) * 144.0 - sin(e * g) * 212.0 * p.x;
+                h = (h + (f - e) * q + sin(r - (a + h) / 7.0) * 10.0 + i / 4.0) * g;
+                i += cos(h * 2.3 * sin(a / 350.0 - q)) * 184.0 * sin(q - (r * 4.3 + a / 12.0) * g) + tan(r * g + h) * 184.0 * cos(r * g + h);
+                i = mod(i / 5.6, 256.0) / 64.0;
+                if (i < 0.0) i += 4.0;
+                if (i >= 2.0) i = 4.0 - i;
+                d = r / 350.0;
+                d += sin(d * d * 8.0) * 0.52;
+                f = (sin(a * g) + 1.0) / 2.0;
+                gl_FragColor = vec4(vec3(f * i / 1.6, i / 2.0 + d / 13.0, i) * d * p.x + vec3(i / 1.3 + d / 8.0, i / 2.0 + d / 18.0, i) * d * (1.0 - p.x), 1.0);
+            }
+        `,
+        side: THREE.BackSide
+    });
+    const background = new THREE.Mesh(bgGeometry, bgMaterial);
+    scene.add(background);
+
+    starField = new THREE.Group();
+    for (let i = 0; i < 1000; i++) {
+        const star = new THREE.Mesh(
+            new THREE.SphereGeometry(Math.random() * 0.1 + 0.1, 8, 8),
+            new THREE.MeshBasicMaterial({ color: 0xffffff })
+        );
+        star.position.set(
+            Math.random() * 600 - 300,
+            Math.random() * 600 - 300,
+            Math.random() * 600 - 300
+        );
+        starField.add(star);
+    }
+    scene.add(starField);
+
+    for (let i = 0; i < 5; i++) {
+        createPlanet(i);
+    }
+
+    const ambientLight = new THREE.AmbientLight(0x404040);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    directionalLight.position.set(1, 1, 1).normalize();
+    scene.add(directionalLight);
+
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keyup', onKeyUp);
+    document.addEventListener('keypress', onKeyPress);  
+    document.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('resize', onWindowResize);
+
+    setupAudio();
+    updateLivesDisplay();
+    
+    playerQuaternion = new THREE.Quaternion();
+    camera.quaternion.copy(playerQuaternion);
+}
+
+function randomizeMonsterPositions() {
+    for (let insect of insects) {
+        const x = Math.random() * 400 - 200;
+        const y = Math.random() * 400 - 200;
+        const z = Math.random() * 400 - 300;
+        insect.position.set(x, y, z);
+        
+        if (insect.userData.isUFO) {
+            setNewUFOTarget(insect);
+        }
+    }
+}
+
+function createComet() {
+    const cometGeometry = new THREE.SphereGeometry(2, 32, 32);
+    const cometMaterial = new THREE.MeshPhongMaterial({
+        color: 0xcccccc,
+        emissive: 0x88ccff,
+        emissiveIntensity: 0.5
+    });
+    const comet = new THREE.Mesh(cometGeometry, cometMaterial);
+    
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 500;
+    comet.position.set(
+        Math.cos(angle) * radius,
+        (Math.random() - 0.5) * radius,
+        Math.sin(angle) * radius
+    );
+    
+    const velocity = new THREE.Vector3(-comet.position.x, -comet.position.y, -comet.position.z);
+    velocity.normalize().multiplyScalar(5 + Math.random() * 5);
+    comet.userData.velocity = velocity;
+    
+    scene.add(comet);
+    return comet;
+}
+
+function updateComets(delta) {
+    scene.children.forEach((object) => {
+        if (object.geometry && object.geometry.type === 'SphereGeometry' && object.userData.velocity) {
+            object.position.add(object.userData.velocity.clone().multiplyScalar(delta));
+            
+            createFireyTrace(object.position);
+            
+            if (object.position.distanceTo(camera.position) < 5) {
+                lives--;
+                updateLivesDisplay();
+                showOuchMessage();
+                speakOuch();
+                if (lives <= 0) {
+                    isGameOver = true;
+                    showGameOverScreen();
+                }
+                scene.remove(object);
+            }
+            
+            insects.forEach((insect, insectIndex) => {
+                if (object.position.distanceTo(insect.position) < 5) {
+                    scene.remove(insect);
+                    insects.splice(insectIndex, 1);
+                    score += insect.userData.isUFO ? 1500 : 100;
+                    document.getElementById('score').textContent = score;
+                    createChiptuneExplosionSound();
+                    scene.remove(object);
+                }
+            });
+            
+            planets.forEach((planet) => {
+                if (object.position.distanceTo(planet.position) < planet.geometry.parameters.radius) {
+                    explodePlanet(planet);
+                    scene.remove(object);
+                }
+            });
+            
+            if (object.position.length() > 1000) {
+                scene.remove(object);
+            }
+        }
+    });
+}
+
+function getRandomOffset() {
+    return new THREE.Vector3(
+        (Math.random() - 0.5) * 0.5,
+        (Math.random() - 0.5) * 0.5,
+        (Math.random() - 0.5) * 0.5
+    );
+}
+
+function isCrosshairOnEnemy() {
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(new THREE.Vector2(), camera);
+    const intersects = raycaster.intersectObjects(insects);
+    return intersects.length > 0;
+}
+
+function createUFOMoveSound(distance) {
+    const maxDistance = 200;
+    const minPitch = 1000;
+    const maxPitch = 2000;
+    
+    const pitch = minPitch + (maxPitch - minPitch) * (1 - Math.min(distance, maxDistance) / maxDistance);
+    const volume = 0.1 * (1 - Math.min(distance, maxDistance) / maxDistance);
+    
+    const oscillator = audioContext.createOscillator();
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(pitch, audioContext.currentTime);
+    
+    const gainNode = audioContext.createGain();
+    gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.1);
+}
+
+function createUFOLaserSound() {
+    const oscillator = audioContext.createOscillator();
+    oscillator.type = 'sawtooth';
+    oscillator.frequency.setValueAtTime(1500, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(500, audioContext.currentTime + 0.2);
+    
+    const gainNode = audioContext.createGain();
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.2);
+}
+
+function createUFOHitSound() {
+    const oscillator = audioContext.createOscillator();
+    oscillator.type = 'square';
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+    
+    const gainNode = audioContext.createGain();
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.1);
+}
+
+function createUFODeathSound() {
+    const oscillator = audioContext.createOscillator();
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.5);
+    
+    const gainNode = audioContext.createGain();
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.5);
+}
+
+function createUFO(x, y, z) {
+    const ufoGroup = new THREE.Group();
+    
+    const body = new THREE.Mesh(
+        new THREE.SphereGeometry(3, 32, 32),
+        new THREE.MeshPhongMaterial({ 
+            color: 0x888888, 
+            metalness: 0.8, 
+            roughness: 0.2 
+        })
+    );
+    body.scale.y = 0.3;
+    ufoGroup.add(body);
+    
+    const dome = new THREE.Mesh(
+        new THREE.SphereGeometry(1.5, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2),
+        new THREE.MeshPhongMaterial({ 
+            color: 0x44aaff, 
+            transparent: true, 
+            opacity: 0.7 
+        })
+    );
+    dome.position.y = 0.9;
+    ufoGroup.add(dome);
+
+    for (let i = 0; i < 8; i++) {
+        const light = new THREE.Mesh(
+            new THREE.SphereGeometry(0.3, 16, 16),
+            new THREE.MeshPhongMaterial({ 
+                color: 0xffff00, 
+                emissive: 0xffff00, 
+                emissiveIntensity: 0.5 
+            })
+        );
+        const angle = (i / 8) * Math.PI * 2;
+        light.position.set(Math.cos(angle) * 2.5, 0, Math.sin(angle) * 2.5);
+        ufoGroup.add(light);
+    }
+
+    const glowMaterial = new THREE.MeshBasicMaterial({
+        color: 0x00ffff,
+        transparent: true,
+        opacity: 0.5
+    });
+    const glowSphere = new THREE.Mesh(new THREE.SphereGeometry(3.5, 32, 32), glowMaterial);
+    ufoGroup.add(glowSphere);
+
+    ufoGroup.position.set(x, y, z);
+    ufoGroup.userData.isUFO = true;
+    ufoGroup.userData.health = 5;  
+    ufoGroup.userData.state = 'moving';
+    ufoGroup.userData.stateChangeTime = performance.now();
+    ufoGroup.userData.targetPosition = new THREE.Vector3();
+    ufoGroup.userData.lastPosition = new THREE.Vector3(x, y, z);
+
+    setNewUFOTarget(ufoGroup);
+
+    scene.add(ufoGroup);
+}
+
+function setNewUFOTarget(ufo) {
+    const minDistance = 100;
+    const maxDistance = 200;
+    let newTarget;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    do {
+        newTarget = new THREE.Vector3(
+            Math.random() * 400 - 200,
+            Math.random() * 400 - 200,
+            Math.random() * 400 - 200
+        );
+        attempts++;
+    } while ((newTarget.distanceTo(camera.position) < minDistance || 
+              newTarget.distanceTo(camera.position) > maxDistance ||
+              !isPositionFarFromOtherUFOs(newTarget, ufo)) && 
+             attempts < maxAttempts);
+
+    ufo.userData.targetPosition.copy(newTarget);
+}
+
+function isPositionFarFromOtherUFOs(position, currentUFO) {
+    const minDistanceBetweenUFOs = 50;
+    for (let insect of insects) {
+        if (insect.userData.isUFO && insect !== currentUFO) {
+            if (position.distanceTo(insect.position) < minDistanceBetweenUFOs) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function updateUFO(ufo, time) {
+    if (ufo.userData.state === 'moving') {
+        if (ufo.position.distanceTo(ufo.userData.targetPosition) < 1) {
+            ufo.userData.state = 'stopping';
+            ufo.userData.stateChangeTime = time;
+        } else {
+            const direction = new THREE.Vector3().subVectors(ufo.userData.targetPosition, ufo.position).normalize();
+            ufo.position.add(direction.multiplyScalar(UFO_SPEED));
+            
+            createUFOMoveSound(ufo.position.distanceTo(camera.position));
+            createUFOTrace(ufo.userData.lastPosition, ufo.position);
+            ufo.userData.lastPosition.copy(ufo.position);
+        }
+    } else if (ufo.userData.state === 'stopping') {
+        if (time - ufo.userData.stateChangeTime > UFO_STOP_TIME) {
+            shootUFOProjectile(ufo);
+            ufo.userData.state = 'moving';
+            ufo.userData.stateChangeTime = time;
+            setNewUFOTarget(ufo);
+            flashUFORed(ufo);
+        }
+    }
+
+    const glowSphere = ufo.children[ufo.children.length - 1];
+    glowSphere.material.opacity = 0.5 + Math.sin(time * 0.005) * 0.2;
+}
+
+function createUFOTrace(startPosition, endPosition) {
+    const geometry = new THREE.BufferGeometry().setFromPoints([startPosition, endPosition]);
+    const material = new THREE.LineBasicMaterial({
+        color: 0x00ffff,
+        linewidth: 5,
+        transparent: true,
+        opacity: 0.7
+    });
+    const trace = new THREE.Line(geometry, material);
+    scene.add(trace);
+    
+    gsap.to(material, {
+        opacity: 0,
+        duration: 1,
+        onComplete: () => {
+            scene.remove(trace);
+        }
+    });
+}
+
+function flashUFORed(ufo) {
+    const originalColor = ufo.children[0].material.color.clone();
+    ufo.children[0].material.color.setHex(0xff0000);
+    
+    setTimeout(() => {
+        ufo.children[0].material.color.copy(originalColor);
+    }, 100);
+}
+
+function shootUFOProjectile(ufo) {
+    const projectileGeometry = new THREE.SphereGeometry(0.5, 8, 8);
+    const projectileMaterial = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+    const projectile = new THREE.Mesh(projectileGeometry, projectileMaterial);
+    
+    projectile.position.copy(ufo.position);
+    const direction = new THREE.Vector3().subVectors(camera.position, ufo.position).normalize();
+    projectile.userData.velocity = direction.multiplyScalar(8);
+    
+    scene.add(projectile);
+    ufoProjectiles.push(projectile);
+
+    createUFOLaserSound();
+}
+
+function createPlanetHitSound(hitCount) {
+    const oscillator = audioContext.createOscillator();
+    oscillator.type = 'square';
+    oscillator.frequency.setValueAtTime(880 + hitCount * 50, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(1760 + hitCount * 100, audioContext.currentTime + 0.1);
+
+    const gainNode = audioContext.createGain();
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.1);
+}
+
+function createPlanet(index) {
+    const planet = new THREE.Mesh(
+        new THREE.SphereGeometry(Math.random() * 10 + 5, 32, 32),
+        new THREE.MeshPhongMaterial({
+            color: Math.random() * 0xffffff,
+            emissive: Math.random() * 0xffffff,
+            specular: 0x333333,
+            shininess: 15,
+            emissiveIntensity: 0.1
+        })
+    );
+    planet.position.set(
+        Math.random() * 400 - 200,
+        Math.random() * 400 - 200,
+        Math.random() * 400 - 200
+    );
+    planet.userData.id = index;
+    planet.userData.hitCount = 0;
+    scene.add(planet);
+    planets.push(planet);
+}
+
+function flashScreen() {
+    const flash = document.createElement('div');
+    flash.style.position = 'fixed';
+    flash.style.top = '0';
+    flash.style.left = '0';
+    flash.style.width = '100%';
+    flash.style.height = '100%';
+    flash.style.backgroundColor = 'white';
+    flash.style.opacity = '1';
+    flash.style.transition = 'opacity 100ms';
+    flash.style.pointerEvents = 'none';
+    flash.style.zIndex = '9999';
+    document.body.appendChild(flash);
+
+    setTimeout(() => {
+        flash.style.opacity = '0';
+        setTimeout(() => {
+            document.body.removeChild(flash);
+        }, 100);
+    }, 1);
+}
+
+function explodePlanet(planet) {
+    const explosionPosition = planet.position.clone();
+    createBigEnemyExplosionSound();
+    flashScreen(); 
+
+    const shardCount = 21;  
+    for (let i = 0; i < shardCount; i++) {
+        createShard(explosionPosition);
+    }
+
+    score += 5000;
+    document.getElementById('score').textContent = score;
+    if (Math.floor(score / 10000) > Math.floor(lastFanfareScore / 10000)) {
+        playChiptuneFanfare();
+        lastFanfareScore = score;
+    }
+
+    scene.remove(planet);
+    planets = planets.filter(p => p !== planet);
+}
+
+function createShard(position) {
+    const shard = new THREE.Mesh(
+        new THREE.TetrahedronGeometry(8),
+        new THREE.MeshPhongMaterial({ 
+            color: 0xffffff,
+            emissive: 0xffffff,
+            emissiveIntensity: 0.5
+        })
+    );
+    shard.position.copy(position);
+    shard.userData.velocity = new THREE.Vector3(
+        (Math.random() - 0.5) * 5, 
+        (Math.random() - 0.5) * 5,
+        (Math.random() - 0.5) * 5
+    );
+    shard.userData.blinkTime = 0;
+    shard.userData.isPlanetShard = true;
+    
+    const light = new THREE.PointLight(0xffffff, 1, 50);
+    shard.add(light);
+    
+    scene.add(shard);
+    return shard;
+}
+
+function createFireyTrace(position) {
+    const trace = new THREE.Mesh(
+        new THREE.SphereGeometry(0.5, 8, 8),
+        new THREE.MeshBasicMaterial({ color: 0xff4500, transparent: true, opacity: 0.7 })
+    );
+    trace.position.copy(position);
+    scene.add(trace);
+
+    gsap.to(trace.material, {
+        opacity: 0,
+        duration: 0.5,
+        onComplete: () => {
+            scene.remove(trace);
+        }
+    });
+}
+
+function loadAudioFiles() {
+    const audioFiles = [
+        { url: 'https://example.com/insect_scream.mp3', bufferName: 'insectScreamBuffer' },
+        { url: 'https://example.com/wilhelm_scream.mp3', bufferName: 'wilhelmScreamBuffer' }
+    ];
+
+    audioFiles.forEach(file => {
+        const request = new XMLHttpRequest();
+        request.open('GET', file.url, true);
+        request.responseType = 'arraybuffer';
+        request.onload = function() {
+            audioContext.decodeAudioData(request.response, function(buffer) {
+                window[file.bufferName] = buffer;
+            });
+        };
+        request.send();
+    });
+}
+
+function setupAudio() {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    loadAudioFiles();
+}
+
+function createBigEnemyExplosionSound() {
+    const bufferSize = audioContext.sampleRate * 2; 
+    const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+
+    let lastOut = 0;
+    for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        output[i] = (lastOut + (0.02 * white)) / 1.02;
+        lastOut = output[i];
+        output[i] *= 3.5; 
+    }
+
+    const noiseSource = audioContext.createBufferSource();
+    noiseSource.buffer = noiseBuffer;
+
+    const gainNode = audioContext.createGain();
+    gainNode.gain.setValueAtTime(1, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2);
+
+    const lowPassFilter = audioContext.createBiquadFilter();
+    lowPassFilter.type = 'lowpass';
+    lowPassFilter.frequency.setValueAtTime(1000, audioContext.currentTime);
+    lowPassFilter.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 2);
+
+    noiseSource.connect(lowPassFilter);
+    lowPassFilter.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    noiseSource.start();
+    noiseSource.stop(audioContext.currentTime + 2);
+}
+
+function createChiptuneMetallicSound() {
+    const oscillator = audioContext.createOscillator();
+    oscillator.type = 'square';
+    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(880, audioContext.currentTime + 0.1);
+
+    const gainNode = audioContext.createGain();
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+    const filter = audioContext.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 1000;
+
+    oscillator.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.1);
+}
+
+function createChiptuneLaserSound() {
+    const oscillator = audioContext.createOscillator();
+    oscillator.type = 'square';
+    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(880, audioContext.currentTime + 0.1);
+
+    const gainNode = audioContext.createGain();
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.1);
+}
+
+function createChiptuneExplosionSound() {
+    const oscillator = audioContext.createOscillator();
+    oscillator.type = 'sawtooth';
+    oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(55, audioContext.currentTime + 0.3);
+
+    const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.3, audioContext.sampleRate);
+    const noiseData = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < noiseBuffer.length; i++) {
+        noiseData[i] = Math.random() * 2 - 1;
+    }
+
+    const noiseSource = audioContext.createBufferSource();
+    noiseSource.buffer = noiseBuffer;
+
+    const gainNode = audioContext.createGain();
+    gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+    const lowPassFilter = audioContext.createBiquadFilter();
+    lowPassFilter.type = 'lowpass';
+    lowPassFilter.frequency.setValueAtTime(1000, audioContext.currentTime);
+    lowPassFilter.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.3);
+
+    oscillator.connect(gainNode);
+    noiseSource.connect(lowPassFilter);
+    lowPassFilter.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.start();
+    noiseSource.start();
+    oscillator.stop(audioContext.currentTime + 0.3);
+    noiseSource.stop(audioContext.currentTime + 0.3);
+}
+
+function playInsectScream(position) {
+    if (insectScreamBuffer) {
+        const source = audioContext.createBufferSource();
+        source.buffer = insectScreamBuffer;
+        
+        const gainNode = audioContext.createGain();
+        gainNode.gain.setValueAtTime(1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+        
+        source.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        source.start();
+    }
+}
+
+function playWilhelmScream(position) {
+    if (wilhelmScreamBuffer) {
+        const source = audioContext.createBufferSource();
+        source.buffer = wilhelmScreamBuffer;
+        
+        const gainNode = audioContext.createGain();
+        gainNode.gain.setValueAtTime(1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+        
+        source.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        source.start();
+    }
+}
+
+function speakOuch() {
+    const utterance = new SpeechSynthesisUtterance("OUCH");
+    utterance.rate = 1.5;
+    utterance.pitch = 0.7;
+    utterance.volume = 1;
+    speechSynthesis.speak(utterance);
+}
+
+function createInsect(x, y, z) {
+    if (Math.random() < 0.2) {
+        createBigMonster(x, y, z);
+    } else {
+        const insectGeometry = new THREE.Group();
+        
+        const body = new THREE.Mesh(
+            new THREE.SphereGeometry(2, 16, 16),
+            new THREE.MeshPhongMaterial({ color: Math.random() * 0xffffff })
+        );
+        insectGeometry.add(body);
+
+        for (let i = 0; i < 2; i++) {
+            const wing = new THREE.Mesh(
+                new THREE.ConeGeometry(1.5, 4, 32),
+                new THREE.MeshPhongMaterial({ color: 0xaaaaaa, transparent: true, opacity: 0.6 })
+            );
+            wing.position.set(i === 0 ? -1.5 : 1.5, 0, 0);
+            wing.rotation.z = Math.PI / 2 * (i === 0 ? 1 : -1);
+            insectGeometry.add(wing);
+        }
+
+        for (let i = 0; i < 2; i++) {
+            const eye = new THREE.Mesh(
+                new THREE.SphereGeometry(0.5, 16, 16),
+                new THREE.MeshPhongMaterial({ color: 0x000000, emissive: 0xff0000 })
+            );
+            eye.position.set(i === 0 ? -0.8 : 0.8, 0.5, -1.5);
+            insectGeometry.add(eye);
+        }
+
+        insectGeometry.position.set(x, y, z);
+
+        scene.add(insectGeometry);
+        insects.push(insectGeometry);
+    }
+}
+
+function createBigMonster(x, y, z) {
+    const monsterGroup = new THREE.Group();
+    
+    const body = new THREE.Mesh(
+        new THREE.SphereGeometry(4, 32, 32),
+        new THREE.MeshPhongMaterial({ 
+            color: 0x330000, 
+            roughness: 0.7, 
+            metalness: 0.2 
+        })
+    );
+    monsterGroup.add(body);
+
+    for (let i = 0; i < 3; i++) {
+        const eye = new THREE.Mesh(
+            new THREE.SphereGeometry(0.8, 16, 16),
+            new THREE.MeshPhongMaterial({ 
+                color: 0xff0000, 
+                emissive: 0xff0000, 
+                emissiveIntensity: 0.5 
+            })
+        );
+        eye.position.set(Math.cos(i * Math.PI * 2 / 3) * 2, Math.sin(i * Math.PI * 2 / 3) * 2, -3);
+        monsterGroup.add(eye);
+    }
+
+    for (let i = 0; i < 8; i++) {
+        const tentacle = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.2, 0.05, 6, 8),
+            new THREE.MeshPhongMaterial({ color: 0x660000 })
+        );
+        tentacle.position.set(
+            Math.cos(i * Math.PI / 4) * 3,
+            Math.sin(i * Math.PI / 4) * 3,
+            0
+        );
+        tentacle.rotation.x = Math.PI / 2;
+        monsterGroup.add(tentacle);
+    }
+
+    for (let i = 0; i < 20; i++) {
+        const spike = new THREE.Mesh(
+            new THREE.ConeGeometry(0.5, 2, 8),
+            new THREE.MeshPhongMaterial({ color: 0x888888 })
+        );
+        spike.position.setFromSpherical(new THREE.Spherical(
+            4,
+            Math.random() * Math.PI,
+            Math.random() * Math.PI * 2
+        ));
+        spike.lookAt(0, 0, 0);
+        monsterGroup.add(spike);
+    }
+
+    monsterGroup.position.set(x, y, z);
+
+    monsterGroup.userData.isBigMonster = true;
+    monsterGroup.userData.health = 500;
+
+    scene.add(monsterGroup);
+    insects.push(monsterGroup);
+}
+
+function getDirectionToPlayer(enemyPosition) {
+    const direction = new THREE.Vector3();
+    direction.subVectors(camera.position, enemyPosition).normalize();
+    return direction;
+}
+
+function createExplosion(position) {
+    const particleCount = 50;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    const sizes = new Float32Array(particleCount);
+
+    for (let i = 0; i < particleCount; i++) {
+        const i3 = i * 3;
+        positions[i3] = position.x;
+        positions[i3 + 1] = position.y;
+        positions[i3 + 2] = position.z;
+
+        colors[i3] = Math.random();
+        colors[i3 + 1] = Math.random();
+        colors[i3 + 2] = Math.random();
+
+        sizes[i] = Math.random() * 2 + 1;
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+    const material = new THREE.PointsMaterial({
+        size: 1,
+        vertexColors: true,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        sizeAttenuation: true
+    });
+
+    const particles = new THREE.Points(geometry, material);
+    scene.add(particles);
+
+    return particles;
+}
+
+function createTrace(position, color) {
+    const geometry = new THREE.SphereGeometry(0.1, 8, 8);
+    const material = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.7 });
+    const trace = new THREE.Mesh(geometry, material);
+    trace.position.copy(position);
+    scene.add(trace);
+
+    gsap.to(material, {
+        opacity: 0,
+        duration: 2,
+        onComplete: () => {
+            scene.remove(trace);
+        }
+    });
+}
+
+function animateExplosion(particles, delta) {
+    const positions = particles.geometry.attributes.position.array;
+    const velocities = particles.userData.velocities;
+
+    for (let i = 0; i < positions.length; i += 3) {
+        positions[i] += velocities[i] * delta;
+        positions[i + 1] += velocities[i + 1] * delta;
+        positions[i + 2] += velocities[i + 2] * delta;
+    }
+
+    particles.geometry.attributes.position.needsUpdate = true;
+    particles.userData.lifetime -= delta;
+
+    if (particles.userData.lifetime <= 0) {
+        scene.remove(particles);
+        return false;
+    }
+    return true;
+}
+
+function shootLaser() {
+    const laserGeometry = new THREE.CylinderGeometry(0.1, 0.1, 2, 8);
+    const laserMaterial = new THREE.MeshBasicMaterial({ color: 0xff00ff });
+    const laser = new THREE.Mesh(laserGeometry, laserMaterial);
+    
+    laser.position.copy(camera.position);
+    laser.rotation.copy(camera.rotation);
+    laser.translateZ(-2);
+    
+    scene.add(laser);
+    lasers.push(laser);
+
+    createChiptuneLaserSound(); 
+}
+
+function updateLivesDisplay() {
+    document.getElementById('lives').innerHTML = '❤️'.repeat(lives);
+}
+
+function showOuchMessage() {
+    const ouchMessage = document.getElementById('ouchMessage');
+    ouchMessage.style.opacity = '1';
+    setTimeout(() => {
+        ouchMessage.style.opacity = '0';
+    }, 200);
+}
+
+function checkPlayerInsectCollision() {
+    for (let insect of insects) {
+        const collisionDistance = insect.userData.isBigMonster ? 10 : insect.userData.isUFO ? 8 : 6;
+        if (camera.position.distanceTo(insect.position) < collisionDistance) {
+            lives--;
+            updateLivesDisplay();
+            showOuchMessage();
+            speakOuch();
+            if (lives <= 0) {
+                isGameOver = true;
+                showGameOverScreen();
+            } else {
+                respawnPlayer();
+            }
+            break;
+        }
+    }
+}
+
+function checkPlayerPlanetCollision() {
+    for (let planet of planets) {
+        if (camera.position.distanceTo(planet.position) < planet.geometry.parameters.radius + 2) {
+            explodePlanet(planet);
+            break;
+        }
+    }
+}
+
+function respawnPlayer() {
+    startCountdown(() => {
+        camera.position.set(0, 0, 5);
+        camera.rotation.set(0, 0, 0);
+        playerQuaternion.set(0, 0, 0, 1);
+        velocity.set(0, 0, 0);
+        acceleration.set(0, 0, 0);
+        
+        randomizeMonsterPositions();
+    });
+}
+
+function playSadChiptuneJingle() {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const masterGain = audioCtx.createGain();
+    masterGain.connect(audioCtx.destination);
+    masterGain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+
+    const notes = [
+        { freq: 440, duration: 0.2 },
+        { freq: 415.3, duration: 0.2 },
+        { freq: 392, duration: 0.1 },
+        { freq: 349.2, duration: 0.1 },
+        { freq: 329.6, duration: 0.2 },
+        { freq: 311.1, duration: 0.2 },
+        { freq: 293.7, duration: 0.2 },
+        { freq: 261.6, duration: 0.4 }
+    ];
+
+    let startTime = audioCtx.currentTime;
+
+    notes.forEach((note, index) => {
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const osc3 = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        osc1.type = 'square';
+        osc2.type = 'triangle';
+        osc3.type = 'sawtooth';
+
+        osc1.frequency.setValueAtTime(note.freq, startTime);
+        osc2.frequency.setValueAtTime(note.freq * 1.01, startTime);
+        osc3.frequency.setValueAtTime(note.freq * 0.5, startTime);
+
+        osc1.frequency.linearRampToValueAtTime(note.freq * 0.99, startTime + note.duration);
+        osc2.frequency.linearRampToValueAtTime(note.freq * 1.005, startTime + note.duration);
+
+        gainNode.gain.setValueAtTime(0.5, startTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + note.duration);
+
+        osc1.connect(gainNode);
+        osc2.connect(gainNode);
+        osc3.connect(gainNode);
+        gainNode.connect(masterGain);
+
+        osc1.start(startTime);
+        osc2.start(startTime);
+        osc3.start(startTime);
+        osc1.stop(startTime + note.duration);
+        osc2.stop(startTime + note.duration);
+        osc3.stop(startTime + note.duration);
+
+        if (index % 2 === 0) {
+            const arpeggioOsc = audioCtx.createOscillator();
+            arpeggioOsc.type = 'sine';
+            arpeggioOsc.frequency.setValueAtTime(note.freq * 2, startTime + note.duration / 2);
+            const arpeggioGain = audioCtx.createGain();
+            arpeggioGain.gain.setValueAtTime(0.2, startTime + note.duration / 2);
+            arpeggioGain.gain.exponentialRampToValueAtTime(0.001, startTime + note.duration);
+            arpeggioOsc.connect(arpeggioGain);
+            arpeggioGain.connect(masterGain);
+            arpeggioOsc.start(startTime + note.duration / 2);
+            arpeggioOsc.stop(startTime + note.duration);
+        }
+
+        startTime += note.duration;
+    });
+
+    setTimeout(() => masterGain.disconnect(), startTime * 1000 + 100);
+}
+
+function showGameOverScreen() {
+    playSadChiptuneJingle();
+    
+    const estimatedKills = Math.floor(score / 100);
+    const minutesPlayed = elapsedTime / 60000;
+    const killsPerMinute = (minutesPlayed > 0) ? (estimatedKills / minutesPlayed).toFixed(2) : 0;
+    
+    const gameOverDiv = document.createElement('div');
+    gameOverDiv.id = 'gameOver';
+    gameOverDiv.innerHTML = `
+        <h1>Game Over</h1>
+        <p>Your score: ${score}</p>
+        <p>Your time: ${formatTime(elapsedTime)}</p>
+        <p>Kills per minute: ${killsPerMinute}</p>
+        <p>Press Return to restart</p>
+    `;
+    document.body.appendChild(gameOverDiv);
+}
+
+function restartGame() {
+    lives = 3;
+    updateLivesDisplay();
+    playerHealth = 100;
+    isGameOver = false;
+    score = 0;
+    document.getElementById('score').textContent = score;
+    
+    for (let insect of insects) {
+        scene.remove(insect);
+    }
+    insects = [];
+    
+    const numEnemies = Math.min(10, MAX_ENEMIES); 
+    for (let i = 0; i < numEnemies; i++) {
+        const x = Math.random() * 200 - 100;
+        const y = Math.random() * 200 - 100;
+        const z = Math.random() * 200 - 300;
+        createInsect(x, y, z);
+    }
+    
+    document.body.removeChild(document.getElementById('gameOver'));
+    
+    startCountdown(() => {
+        startTime = Date.now();
+        elapsedTime = 0;
+        document.getElementById('timer').textContent = 'Time: 00:00';
+        
+        document.exitPointerLock();
+    });
+}
+
+function playPacManSound(distance) {
+    const maxDistance = 50; 
+    const minPitch = 100; 
+    const maxPitch = 400; 
+    
+    if (distance <= maxDistance) {
+        const oscillator = audioContext.createOscillator();
+        oscillator.type = 'triangle'; 
+        
+        const pitch = minPitch + (maxPitch - minPitch) * (1 - distance / maxDistance);
+        oscillator.frequency.setValueAtTime(pitch, audioContext.currentTime);
+        
+        const gainNode = audioContext.createGain();
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.1);
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.1);
+    }
+}
+
+function playChiptuneFanfare() {
+    const oscillator1 = audioContext.createOscillator();
+    const oscillator2 = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator1.type = 'square';
+    oscillator2.type = 'square';
+
+    oscillator1.connect(gainNode);
+    oscillator2.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    const now = audioContext.currentTime;
+    gainNode.gain.setValueAtTime(0.3, now);
+
+    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    const duration = 0.1;
+
+    notes.forEach((note, index) => {
+        oscillator1.frequency.setValueAtTime(note, now + index * duration);
+        oscillator2.frequency.setValueAtTime(note * 1.01, now + index * duration); // Slight detuning for fuller sound
+    });
+
+    oscillator1.start(now);
+    oscillator2.start(now);
+    oscillator1.stop(now + notes.length * duration);
+    oscillator2.stop(now + notes.length * duration);
+
+    gainNode.gain.setValueAtTime(0.3, now + notes.length * duration - 0.05);
+    gainNode.gain.linearRampToValueAtTime(0, now + notes.length * duration);
+}
+
+function onKeyDown(event) {
+    if (!isGameOver && !isCountingDown) {
+        switch (event.code) {
+            case 'KeyW': moveBackward = true; break;
+            case 'KeyS': moveForward = true; break;
+            case 'KeyA': moveLeft = true; break;
+            case 'KeyD': moveRight = true; break;
+            case 'Space': shootLaser(); break;
+            case 'KeyP': togglePause(); break;
+            case 'KeyL': addPoints(); break;
+        }
+    }
+}
+
+function onKeyUp(event) {
+    if (!isGameOver && !isCountingDown) {
+        switch (event.code) {
+            case 'KeyW': moveBackward = false; break;
+            case 'KeyS': moveForward = false; break;
+            case 'KeyA': moveLeft = false; break;
+            case 'KeyD': moveRight = false; break;
+        }
+    }
+}
+
+function onKeyPress(event) {
+    if (event.code === 'Enter' && isGameOver) {
+        restartGame();
+    }
+}
+
+function togglePause() {
+    isPaused = !isPaused;
+    if (isPaused) {
+        pauseIcon.style.display = 'flex';
+    } else {
+        pauseIcon.style.display = 'none';
+    }
+}
+
+function addPoints() {
+    score += 10000;
+    document.getElementById('score').textContent = score;
+    if (Math.floor(score / 10000) > Math.floor(lastFanfareScore / 10000)) {
+        playChiptuneFanfare();
+        lastFanfareScore = score;
+    }
+}
+
+function onMouseMove(event) {
+    if (!isGameOver && !isCountingDown) {
+        const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+        const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+        const horizontalQuaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -movementX * 0.002);
+        const verticalQuaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -movementY * 0.002);
+
+        playerQuaternion.multiply(horizontalQuaternion);
+        playerQuaternion.multiply(verticalQuaternion);
+
+        camera.quaternion.copy(playerQuaternion);
+    }
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    if (!isGameOver && !isPaused && !isCountingDown) {
+        const time = performance.now();
+        const delta = (time - prevTime) / 1000;
+
+        velocity.multiplyScalar(friction);
+
+        acceleration.set(0, 0, 0);
+
+        if (moveForward) acceleration.z -= accelerationRate;
+        if (moveBackward) acceleration.z += accelerationRate;
+        if (moveLeft) acceleration.x -= accelerationRate;
+        if (moveRight) acceleration.x += accelerationRate;
+
+        velocity.add(acceleration.multiplyScalar(delta));
+
+        if (velocity.length() > maxSpeed) {
+            velocity.normalize().multiplyScalar(maxSpeed);
+        }
+
+        rotationMatrix.makeRotationFromQuaternion(playerQuaternion);
+        const forward = new THREE.Vector3(0, 0, -1).applyMatrix4(rotationMatrix);
+        const right = new THREE.Vector3(1, 0, 0).applyMatrix4(rotationMatrix);
+
+        const newPosition = camera.position.clone();
+        newPosition.add(forward.multiplyScalar(velocity.z * delta));
+        newPosition.add(right.multiplyScalar(velocity.x * delta));
+
+        const boundaryRadius = 300;
+        if (newPosition.length() < boundaryRadius) {
+            camera.position.copy(newPosition);
+        } else {
+            velocity.set(0, 0, 0);
+        }
+
+        starField.rotation.y += 0.0005;
+
+        planets.forEach((planet, index) => {
+            planet.rotation.y += 0.001 * (index + 1);
+            
+            lasers.forEach((laser, laserIndex) => {
+                if (laser.position.distanceTo(planet.position) < planet.geometry.parameters.radius) {
+                    planetHealth[planet.userData.id]--;
+                    scene.remove(laser);
+                    lasers.splice(laserIndex, 1);
+
+                    planet.userData.hitCount++;  
+                    createPlanetHitSound(planet.userData.hitCount);  
+
+                    planet.material.emissiveIntensity = Math.min(1, 0.1 + planet.userData.hitCount * 0.04);
+
+                    if (planetHealth[planet.userData.id] <= 0) {
+                        explodePlanet(planet);
+                    }
+                }
+            });
+        });
+
+        insects.forEach((insect, index) => {
+            if (insect.userData.isUFO) {
+                updateUFO(insect, time);
+            } else {
+                const directionToPlayer = getDirectionToPlayer(insect.position);
+                const randomOffset = getRandomOffset();
+                const adjustedDirection = directionToPlayer.add(randomOffset).normalize();
+                const speed = insect.userData.isBigMonster ? 1.2 * 0.8 : insect.userData.isUFO ? 1.5 * 0.8 : 0.9 * 0.8; 
+                
+                const oldPosition = insect.position.clone();
+                insect.position.add(adjustedDirection.multiplyScalar(speed));
+                
+                const newDirectionToPlayer = getDirectionToPlayer(insect.position);
+                insect.position.add(newDirectionToPlayer.multiplyScalar(speed * 0.2));
+                
+                if (insect.userData.isUFO) {
+                    insect.rotation.y += 0.02;
+                    for (let i = 2; i < insect.children.length; i++) {
+                        insect.children[i].material.emissiveIntensity = 0.5 + Math.sin(time * 0.01 + i) * 0.5;
+                    }
+                    const traceColor = 0xffff00;
+                    createTrace(oldPosition, traceColor);
+                } else if (insect.userData.isBigMonster) {
+                    insect.rotation.y += 0.005;
+                    for (let i = 1; i <= 8; i++) {
+                        const tentacle = insect.children[i + 3];
+                        tentacle.rotation.z = Math.sin(time * 0.005 + i) * 0.2;
+                    }
+                    for (let i = 0; i < 3; i++) {
+                        const eye = insect.children[i + 1];
+                        eye.material.emissiveIntensity = 0.5 + Math.sin(time * 0.01 + i) * 0.2;
+                    }
+                } else {
+                    insect.rotation.y += 0.01;
+                    insect.children[1].rotation.y = Math.sin(time * 0.01) * 0.5;
+                    insect.children[2].rotation.y = -Math.sin(time * 0.01) * 0.5;
+                }
+                
+                insect.lookAt(camera.position);
+
+                const distanceToPlayer = insect.position.distanceTo(camera.position);
+                playPacManSound(distanceToPlayer);
+            }
+        });
+        
+        scene.children.forEach(child => {
+            if (child.userData && child.userData.isPlanetShard) {
+                planets.forEach((planet, index) => {
+                    if (child.position.distanceTo(planet.position) < planet.geometry.parameters.radius) {
+                        explodePlanet(planet);
+                        scene.remove(child);
+                    }
+                });
+            }
+        });
+
+        for (let i = lasers.length - 1; i >= 0; i--) {
+            const laser = lasers[i];
+            laser.translateZ(-10);
+
+            if (laser.position.distanceTo(camera.position) > 1000) {
+                scene.remove(laser);
+                lasers.splice(i, 1);
+                continue;
+            }
+
+            for (let j = insects.length - 1; j >= 0; j--) {
+                const insect = insects[j];
+                if (laser.position.distanceTo(insect.position) < (insect.userData.isUFO ? 5 : (insect.userData.isBigMonster ? 6 : 3))) {
+                    if (insect.userData.isUFO) {
+                        insect.userData.health--;
+                        createUFOHitSound();
+                        if (insect.userData.health <= 0) {
+                            scene.remove(insect);
+                            insects.splice(j, 1);
+                            score += 1500; 
+                            document.getElementById('score').textContent = score;
+                            if (Math.floor(score / 10000) > Math.floor(lastFanfareScore / 10000)) {
+                                playChiptuneFanfare();
+                                lastFanfareScore = score;
+                            }
+                            createUFODeathSound();
+                        }
+                    } else if (insect.userData.isBigMonster) {
+                        insect.userData.health -= 100;
+                        if (insect.userData.health <= 0) {
+                            scene.remove(insect);
+                            insects.splice(j, 1);
+                            score += 500;
+                            document.getElementById('score').textContent = score;
+                            if (Math.floor(score / 10000) > Math.floor(lastFanfareScore / 10000)) {
+                                playChiptuneFanfare();
+                                lastFanfareScore = score;
+                            }
+                            createBigEnemyExplosionSound(); 
+                        }
+                    } else {
+                        scene.remove(insect);
+                        insects.splice(j, 1);
+                        score += 100;
+                        document.getElementById('score').textContent = score;
+                        if (Math.floor(score / 10000) > Math.floor(lastFanfareScore / 10000)) {
+                            playChiptuneFanfare();
+                            lastFanfareScore = score;
+                        }
+                        createChiptuneExplosionSound(); 
+                    }
+                    playInsectScream(insect.position);
+                    playWilhelmScream(insect.position);
+
+                    const explosion = createExplosion(insect.position);
+                    explosion.userData.velocities = new Float32Array(explosion.geometry.attributes.position.count * 3);
+                    for (let k = 0; k < explosion.userData.velocities.length; k += 3) {
+                        explosion.userData.velocities[k] = (Math.random() - 0.5) * 10;
+                        explosion.userData.velocities[k + 1] = (Math.random() - 0.5) * 10;
+                        explosion.userData.velocities[k + 2] = (Math.random() - 0.5) * 10;
+                    }
+                    explosion.userData.lifetime = 2;
+                    explosions.push(explosion);
+
+                    scene.remove(laser);
+                    lasers.splice(i, 1);
+                    break;
+                }
+            }
+        }
+
+        for (let i = ufoProjectiles.length - 1; i >= 0; i--) {
+            const projectile = ufoProjectiles[i];
+            projectile.position.add(projectile.userData.velocity);
+
+            if (projectile.position.distanceTo(camera.position) < 2) {
+                lives--;
+                updateLivesDisplay();
+                showOuchMessage();
+                speakOuch();
+                if (lives <= 0) {
+                    isGameOver = true;
+                    showGameOverScreen();
+                }
+                scene.remove(projectile);
+                ufoProjectiles.splice(i, 1);
+                continue;
+            }
+
+            for (let j = lasers.length - 1; j >= 0; j--) {
+                if (projectile.position.distanceTo(lasers[j].position) < 1) {
+                    scene.remove(projectile);
+                    ufoProjectiles.splice(i, 1);
+                    scene.remove(lasers[j]);
+                    lasers.splice(j, 1);
+                    createChiptuneExplosionSound();
+                    break;
+                }
+            }
+
+            if (projectile.position.distanceTo(camera.position) > 1000) {
+                scene.remove(projectile);
+                ufoProjectiles.splice(i, 1);
+            }
+        }
+
+        if (score >= 30000 && !cometsActive && !cometStartTime) {
+            cometsActive = true;
+            cometStartTime = time;
+        }
+
+        if (cometsActive) {
+            if (time - cometStartTime < 60000) {
+                if (Math.random() < 0.1) {
+                    createComet();
+                }
+                updateComets(delta);
+            } else {
+                cometsActive = false;
+                cometStartTime = null;
+            }
+        }
+
+        scene.children.forEach(child => {
+            if (child.geometry && child.geometry.type === 'TetrahedronGeometry') {
+                child.position.add(child.userData.velocity);
+                createFireyTrace(child.position);
+
+                child.userData.blinkTime += delta;
+                if (child.userData.blinkTime > 0.1) {
+                    const randomColor = Math.random() * 0xffffff;
+                    child.material.color.setHex(randomColor);
+                    child.material.emissive.setHex(randomColor);
+                    child.children[0].color.setHex(randomColor);
+                    child.userData.blinkTime = 0;
+                }
+
+                child.children[0].intensity = 0.5 + Math.sin(time * 0.01) * 0.5;
+
+                insects.forEach((insect, index) => {
+                    if (child.position.distanceTo(insect.position) < 10) {
+                        scene.remove(insect);
+                        insects.splice(index, 1);
+                        score += 100;
+                        document.getElementById('score').textContent = score;
+                        if (Math.floor(score / 10000) > Math.floor(lastFanfareScore / 10000)) {
+                            playChiptuneFanfare();
+                            lastFanfareScore = score;
+                        }
+                    }
+                });
+
+                if (child.position.distanceTo(camera.position) < 10) {
+                    lives--;
+                    updateLivesDisplay();
+                    showOuchMessage();
+                    speakOuch();
+                    if (lives <= 0) {
+                        isGameOver = true;
+                        showGameOverScreen();
+                    }
+                }
+
+                if (child.position.length() > 1000) {
+                    scene.remove(child);
+                }
+            }
+        });
+
+        if (Math.random() < 0.02 && insects.length < MAX_ENEMIES) {
+            const randomX = Math.random() * 200 - 100;
+            const randomY = Math.random() * 200 - 100;
+            const randomZ = Math.random() * 200 - 300;
+            if (score >= 20000 && Math.random() < 0.3) {
+                createUFO(randomX, randomY, randomZ);
+            } else {
+                createInsect(randomX, randomY, randomZ);
+            }
+        }
+
+        const crosshair = document.getElementById('crosshair');
+        if (isCrosshairOnEnemy()) {
+            crosshair.style.borderColor = 'red';
+            crosshair.style.boxShadow = '0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000';
+        } else {
+            crosshair.style.borderColor = 'rgba(255,255,255,0.8)';
+            crosshair.style.boxShadow = '0 0 10px #ff00ff, 0 0 20px #00ffff, 0 0 30px #ffff00';
+        }
+
+        scene.children[0].material.uniforms.time.value = time * 0.001;
+
+        elapsedTime = Date.now() - startTime;
+        document.getElementById('timer').textContent = `Time: ${formatTime(elapsedTime)}`;
+
+        explosions = explosions.filter(explosion => animateExplosion(explosion, delta));
+
+        checkPlayerInsectCollision();
+        checkPlayerPlanetCollision();
+
+        renderer.render(scene, camera);
+        prevTime = time;
+    } else {
+        renderer.render(scene, camera);
+    }
+}
+
+init();
+animate();
+
+renderer.domElement.addEventListener('click', () => {
+    renderer.domElement.requestPointerLock();
+});
+</script>
+</body>
+</html>
