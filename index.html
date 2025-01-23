@@ -1,0 +1,83 @@
+<title>Monkey Run - Adventure Game</title>
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: 'Bananas', cursive;
+        background: linear-gradient(to bottom, #4CAF50, #2E7D32);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #game-menu {
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 20px;
+        padding: 40px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+    h1 {
+        color: #4CAF50;
+        font-size: 48px;
+        margin-bottom: 30px;
+    }
+    .button {
+        display: block;
+        width: 200px;
+        margin: 20px auto;
+        padding: 15px;
+        font-size: 18px;
+        color: white;
+        background-color: #4CAF50;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.1s;
+    }
+    .button:hover {
+        background-color: #45a049;
+        transform: scale(1.05);
+    }
+    #monkey-animation {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 20px;
+    }
+</style>
+</head>
+<body>
+<div id="game-menu">
+    <svg id="monkey-animation" viewBox="0 0 100 100">
+        <g id="monkey">
+            <circle cx="50" cy="50" r="40" fill="#8B4513">
+                <text x="50" y="50" font-size="60" dominant-baseline="middle" text-anchor="middle">🐵</text>
+            </circle>
+            <circle cx="35" cy="40" r="8" fill="white"></circle>
+            <circle cx="65" cy="40" r="8" fill="white"></circle>
+            <circle cx="35" cy="40" r="4" fill="black"></circle>
+            <circle cx="65" cy="40" r="4" fill="black"></circle>
+            <ellipse cx="50" cy="60" rx="15" ry="10" fill="#FFA500"></ellipse>
+        </g>
+    </svg>
+    <h1>Monkey Run</h1>
+    <button class="button" onclick="window.location.href='https://monkeyrun.com/play/storymode'">Story Mode</button>
+    <button class="button" onclick="window.location.href='https://monkeyrun.com/play/arcade'">Arcade Mode</button>
+    <button class="button" onclick="window.location.href='https://monkeyrun.com/leaderboard'">Leaderboard</button>
+    <button class="button" onclick="window.location.href='https://monkeyrun.com/settings'">Settings</button>
+</div>
+
+<script>
+    const monkey = document.getElementById('monkey');
+    let angle = 0;
+
+    function animateMonkey() {
+        angle += 0.1;
+        const y = Math.sin(angle) * 10;
+        monkey.style.transform = `translateY(${y}px)`;
+        requestAnimationFrame(animateMonkey);
+    }
+
+    animateMonkey();
+</script>
+</body></html>
