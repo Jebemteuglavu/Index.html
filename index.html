@@ -1,0 +1,586 @@
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #FFF0F5;
+        margin: 0;
+        padding: 0;
+        color: #333;
+    }
+    .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    header {
+        background-color: #FFB6C1;
+        padding: 20px 0;
+        text-align: center;
+    }
+    h1 {
+        font-size: 2.5em;
+        color: #FF1493;
+        margin: 0;
+    }
+    .kitty-container {
+        position: relative;
+        width: 400px;
+        height: 400px;
+        margin: 30px auto;
+    }
+    .kitty {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+    .ear {
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-left: 60px solid transparent;
+        border-right: 60px solid transparent;
+        border-bottom: 100px solid;
+        transition: all 0.3s ease;
+    }
+    .ear-left {
+        top: -50px;
+        left: 30px;
+        transform: rotate(-30deg);
+    }
+    .ear-right {
+        top: -50px;
+        right: 30px;
+        transform: rotate(30deg);
+    }
+    .eye {
+        position: absolute;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        top: 100px;
+        transition: all 0.3s ease;
+    }
+    .eye-left {
+        left: 80px;
+    }
+    .eye-right {
+        right: 80px;
+    }
+    .pupil {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        background-color: #000;
+        border-radius: 50%;
+        top: 20px;
+        left: 20px;
+        transition: all 0.3s ease;
+    }
+    .nose {
+        position: absolute;
+        width: 40px;
+        height: 25px;
+        background-color: #FFC0CB;
+        border-radius: 50%;
+        top: 230px;
+        left: 180px;
+    }
+    .mouth {
+        position: absolute;
+        width: 120px;
+        height: 80px;
+        border: 12px solid #000;
+        border-radius: 0 0 120px 120px;
+        border-top: none;
+        top: 260px;
+        left: 140px;
+        transition: all 0.3s ease;
+    }
+    .fur-marks {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        overflow: hidden;
+    }
+    .accessory, .collar {
+        position: absolute;
+        cursor: move;
+        transition: all 0.3s ease;
+        z-index: 10;
+    }
+    .collar {
+        width: 250px;
+        height: 40px;
+        border-radius: 20px;
+    }
+    .bow {
+        width: 120px;
+        height: 60px;
+        top: -30px;
+        left: 140px;
+    }
+    .tie {
+        width: 60px;
+        height: 100px;
+        top: 300px;
+        left: 170px;
+    }
+    .hat {
+        width: 200px;
+        height: 100px;
+        top: -80px;
+        left: 100px;
+    }
+    .beret {
+        width: 200px;
+        height: 100px;
+        top: -80px;
+        left: 100px;
+    }
+    .flower {
+        width: 100px;
+        height: 100px;
+        top: -30px;
+        left: 150px;
+    }
+    .glasses {
+        width: 200px;
+        height: 100px;
+        top: -40px;
+        left: 120px;
+    }
+    .controls {
+        background-color: #FFF;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+    .control-group {
+        margin-bottom: 15px;
+        flex-basis: 48%;
+    }
+    label {
+        display: block;
+        margin-bottom: 5px;
+    }
+    input[type="color"], input[type="range"], select {
+        width: 100%;
+    }
+    .angy-meter {
+        background-color: #FFF;
+        border: 2px solid #FF69B4;
+        border-radius: 20px;
+        height: 30px;
+        margin: 20px 0;
+        position: relative;
+    }
+    .angy-level {
+        background-color: #FF69B4;
+        border-radius: 20px;
+        height: 100%;
+        width: 50%;
+        transition: width 0.3s ease;
+    }
+</style>
+</head>
+<body>
+    <header>
+        <h1>Expanded Customize Your Angy Kitty</h1>
+    </header>
+    <div class="container">
+        <div class="kitty-container">
+            <div class="kitty" id="kitty">
+                <div class="fur-marks" id="fur-marks"></div>
+                <div class="ear ear-left"></div>
+                <div class="ear ear-right"></div>
+                <div class="eye eye-left"><div class="pupil"></div></div>
+                <div class="eye eye-right"><div class="pupil"></div></div>
+                <div class="nose"></div>
+                <div class="mouth"></div>
+            </div>
+            <div class="accessory" id="accessory" style="display: block; left: 140px; top: -30px;"></div>
+            <div class="collar" id="collar" style="display: block; left: 75px; top: 300px;"></div>
+        </div>
+        <div class="angy-meter">
+            <div class="angy-level" id="angy-level"></div>
+        </div>
+        <div class="controls">
+            <div class="control-group">
+                <label for="fur-color">Fur Color:</label>
+                <input type="color" id="fur-color" value="#808080">
+            </div>
+            <div class="control-group">
+                <label for="eye-color">Eye Color:</label>
+                <input type="color" id="eye-color" value="#FFFF00">
+            </div>
+            <div class="control-group">
+                <label for="angy-level">Angy Level:</label>
+                <input type="range" id="angy-level-control" min="0" max="100" value="50">
+            </div>
+            <div class="control-group">
+                <label for="fur-pattern">Fur Pattern:</label>
+                <select id="fur-pattern">
+                    <option value="none">None</option>
+                    <option value="spots">Spots</option>
+                    <option value="stripes">Stripes</option>
+                    <option value="patches">Patches</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="eye-shape">Eye Shape:</label>
+                <select id="eye-shape">
+                    <option value="round">Round</option>
+                    <option value="almond">Almond</option>
+                    <option value="squinty">Squinty</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="accessory-type">Accessory:</label>
+                <select id="accessory-type">
+                    <option value="none">None</option>
+                    <option value="bow">Bow</option>
+                    <option value="tie">Tie</option>
+                    <option value="hat">Hat</option>
+                    <option value="beret">Beret</option>
+                    <option value="flower">Flower</option>
+                    <option value="glasses">Glasses</option>
+                </select>
+            </div>
+            <div class="control-group" id="glasses-variant-group" style="display: none;">
+                <label for="glasses-variant">Glasses Variant:</label>
+                <select id="glasses-variant">
+                    <option value="round">Round</option>
+                    <option value="square">Square</option>
+                    <option value="cat-eye">Cat Eye</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="accessory-color">Accessory Color:</label>
+                <input type="color" id="accessory-color" value="#FF0000">
+            </div>
+            <div class="control-group">
+                <label for="collar-color">Collar Color:</label>
+                <input type="color" id="collar-color" value="#FF0000">
+            </div>
+            <div class="control-group">
+                <label for="collar-bell">Collar Bell:</label>
+                <input type="checkbox" id="collar-bell">
+            </div>
+            <div class="control-group">
+                <label for="emotion">Emotion:</label>
+                <select id="emotion">
+                    <option value="angry">Angry</option>
+                    <option value="happy">Happy</option>
+                    <option value="sad">Sad</option>
+                    <option value="surprised">Surprised</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+<script>
+const kitty = document.getElementById('kitty');
+const furMarks = document.getElementById('fur-marks');
+const ears = document.querySelectorAll('.ear');
+const eyes = document.querySelectorAll('.eye');
+const pupils = document.querySelectorAll('.pupil');
+const mouth = document.querySelector('.mouth');
+const accessory = document.getElementById('accessory');
+const collar = document.getElementById('collar');
+const angyLevelElement = document.getElementById('angy-level');
+
+const furColorInput = document.getElementById('fur-color');
+const eyeColorInput = document.getElementById('eye-color');
+const angyLevelControl = document.getElementById('angy-level-control');
+const furPatternSelect = document.getElementById('fur-pattern');
+const eyeShapeSelect = document.getElementById('eye-shape');
+const accessoryTypeSelect = document.getElementById('accessory-type');
+const accessoryColorInput = document.getElementById('accessory-color');
+const collarColorInput = document.getElementById('collar-color');
+const emotionSelect = document.getElementById('emotion');
+const glassesVariantSelect = document.getElementById('glasses-variant');
+const glassesVariantGroup = document.getElementById('glasses-variant-group');
+const collarBellCheckbox = document.getElementById('collar-bell');
+
+let isDragging = false;
+let currentX;
+let currentY;
+let initialX;
+let initialY;
+let xOffset = 0;
+let yOffset = 0;
+let activeElement = null;
+
+const kittyContainer = document.querySelector('.kitty-container');
+
+kittyContainer.addEventListener("mousedown", dragStart);
+document.addEventListener("mousemove", drag);
+document.addEventListener("mouseup", dragEnd);
+kittyContainer.addEventListener('contextmenu', (e) => e.preventDefault());
+
+function dragStart(e) {
+    if (e.button === 0) { // Left click
+        activeElement = accessory;
+    } else if (e.button === 2) { // Right click
+        activeElement = collar;
+        e.preventDefault(); // Prevent context menu
+    }
+    initialX = e.clientX - activeElement.offsetLeft;
+    initialY = e.clientY - activeElement.offsetTop;
+
+    if (e.target === activeElement) {
+        isDragging = true;
+    }
+}
+
+function drag(e) {
+    if (isDragging) {
+        e.preventDefault();
+        currentX = e.clientX - initialX;
+        currentY = e.clientY - initialY;
+
+        setTranslate(currentX, currentY, activeElement);
+    }
+}
+
+function dragEnd(e) {
+    initialX = currentX;
+    initialY = currentY;
+
+    isDragging = false;
+    activeElement = null;
+}
+
+function setTranslate(xPos, yPos, el) {
+    el.style.left = `${xPos}px`;
+    el.style.top = `${yPos}px`;
+}
+
+function updateKitty() {
+    const furColor = furColorInput.value;
+    const eyeColor = eyeColorInput.value;
+    const angyLevel = parseInt(angyLevelControl.value);
+    const furPattern = furPatternSelect.value;
+    const eyeShape = eyeShapeSelect.value;
+    const accessoryType = accessoryTypeSelect.value;
+    const accessoryColor = accessoryColorInput.value;
+    const collarColor = collarColorInput.value;
+    const emotion = emotionSelect.value;
+
+    kitty.style.backgroundColor = furColor;
+    ears.forEach(ear => ear.style.borderBottomColor = furColor);
+    eyes.forEach(eye => eye.style.backgroundColor = eyeColor);
+    collar.style.backgroundColor = collarColor;
+
+    accessory.style.display = 'block';
+    collar.style.display = 'block';
+
+    const eyeNarrow = 80 - (angyLevel * 0.4);
+    eyes.forEach(eye => eye.style.height = `${eyeNarrow}px`);
+
+    const pupilMove = 20 + (angyLevel * 0.2);
+    pupils.forEach(pupil => pupil.style.left = `${pupilMove}px`);
+
+    const mouthHeight = 80 + angyLevel * 0.6;
+    const mouthCurve = 120 + angyLevel;
+    mouth.style.height = `${mouthHeight}px`;
+    mouth.style.borderRadius = `0 0 ${mouthCurve}px ${mouthCurve}px`;
+
+    switch(emotion) {
+        case 'angry':
+            eyes.forEach(eye => eye.style.transform = 'rotate(-10deg)');
+            mouth.style.borderRadius = '0 0 120px 120px';
+            break;
+        case 'happy':
+            eyes.forEach(eye => eye.style.transform = 'rotate(0deg)');
+            mouth.style.borderRadius = '120px 120px 0 0';
+            mouth.style.top = '280px';
+            break;
+        case 'sad':
+            eyes.forEach(eye => eye.style.transform = 'rotate(0deg)');
+            mouth.style.borderRadius = '0 0 120px 120px';
+            mouth.style.height = '40px';
+            mouth.style.top = '300px';
+            break;
+        case 'surprised':
+            eyes.forEach(eye => eye.style.transform = 'scale(1.2)');
+            mouth.style.borderRadius = '50%';
+            mouth.style.height = '60px';
+            mouth.style.width = '60px';
+            mouth.style.left = '170px';
+            break;
+    }
+
+    furMarks.innerHTML = '';
+    switch(furPattern) {
+        case 'spots':
+            furMarks.innerHTML = `
+                <svg width="100%" height="100%" viewBox="0 0 400 400">
+                    <circle cx="100" cy="100" r="30" fill="${lightenColor(furColor, 20)}"/>
+                    <circle cx="300" cy="150" r="40" fill="${lightenColor(furColor, 20)}"/>
+                    <circle cx="200" cy="300" r="35" fill="${lightenColor(furColor, 20)}"/>
+                </svg>
+            `;
+            break;
+        case 'stripes':
+            furMarks.innerHTML = `
+                <svg width="100%" height="100%" viewBox="0 0 400 400">
+                    <path d="M50,50 Q200,100 350,50" stroke="${lightenColor(furColor, 20)}" stroke-width="30" fill="none"/>
+                    <path d="M50,150 Q200,200 350,150" stroke="${lightenColor(furColor, 20)}" stroke-width="30" fill="none"/>
+                    <path d="M50,250 Q200,300 350,250" stroke="${lightenColor(furColor, 20)}" stroke-width="30" fill="none"/>
+                </svg>
+            `;
+            break;
+        case 'patches':
+            furMarks.innerHTML = `
+                <svg width="100%" height="100%" viewBox="0 0 400 400">
+                    <path d="M100,100 Q150,50 200,100 T300,100" fill="${lightenColor(furColor, 20)}"/>
+                    <path d="M50,250 Q100,200 150,250 T250,250" fill="${lightenColor(furColor, 20)}"/>
+                </svg>
+            `;
+            break;
+    }
+
+    switch(eyeShape) {
+        case 'round':
+            eyes.forEach(eye => {
+                eye.style.borderRadius = '50%';
+                eye.style.transform = 'rotate(0deg)';
+            });
+            break;
+        case 'almond':
+            eyes.forEach(eye => {
+                eye.style.borderRadius = '50% 50% 50% 50% / 60% 60% 40% 40%';
+                eye.style.transform = 'rotate(-20deg)';
+            });
+            break;
+        case 'squinty':
+            eyes.forEach(eye => {
+                eye.style.borderRadius = '50%';
+                eye.style.transform = 'scaleY(0.5)';
+            });
+            break;
+    }
+
+    accessory.innerHTML = '';
+    switch(accessoryType) {
+        case 'bow':
+            accessory.innerHTML = `
+                <svg viewBox="0 0 120 60">
+                    <path d="M60,30 Q30,0 0,30 Q30,60 60,30 T120,30 Q90,0 60,30 Z" fill="${accessoryColor}"/>
+                    <circle cx="60" cy="30" r="10" fill="${darkenColor(accessoryColor, 20)}"/>
+                </svg>
+            `;
+            break;
+        case 'tie':
+            accessory.innerHTML = `
+                <svg viewBox="0 0 60 100">
+                    <path d="M30,0 L60,30 L30,100 L0,30 Z" fill="${accessoryColor}"/>
+                </svg>
+            `;
+            break;
+        case 'hat':
+            accessory.innerHTML = `
+                <svg viewBox="0 0 200 100">
+                    <path d="M0,80 Q100,120 200,80 L180,40 Q100,0 20,40 Z" fill="${accessoryColor}"/>
+                    <path d="M20,40 Q100,0 180,40" fill="none" stroke="${darkenColor(accessoryColor, 20)}" stroke-width="5"/>
+                </svg>
+            `;
+            break;
+        case 'beret':
+            accessory.innerHTML = `
+                <svg viewBox="0 0 200 100">
+                    <ellipse cx="100" cy="80" rx="100" ry="20" fill="${accessoryColor}"/>
+                    <path d="M0,80 Q100,0 200,80" fill="${accessoryColor}"/>
+                </svg>
+            `;
+            break;
+        case 'flower':
+            accessory.innerHTML = `
+                <svg viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="30" fill="${accessoryColor}"/>
+                    <circle cx="50" cy="50" r="15" fill="${darkenColor(accessoryColor, 20)}"/>
+                    <path d="M50,20 Q60,50 80,50 Q60,60 60,80 Q50,60 20,60 Q40,50 50,20" fill="${lightenColor(accessoryColor, 20)}"/>
+                </svg>
+            `;
+            break;
+        case 'glasses':
+            const glassesVariant = glassesVariantSelect.value;
+            let glassesPath;
+            switch(glassesVariant) {
+                case 'round':
+                    glassesPath = "M10,50 A40,40 0 0 1 90,50 A40,40 0 0 1 10,50 M110,50 A40,40 0 0 1 190,50 A40,40 0 0 1 110,50 M90,50 L110,50";
+                    break;
+                case 'square':
+                    glassesPath = "M10,20 H90 V80 H10 Z M110,20 H190 V80 H110 Z M90,50 L110,50";
+                    break;
+                case 'cat-eye':
+                    glassesPath = "M10,50 Q50,20 90,50 Q50,80 10,50 M110,50 Q150,20 190,50 Q150,80 110,50 M90,50 L110,50";
+                    break;
+            }
+            accessory.innerHTML = `
+                <svg viewBox="0 0 200 100">
+                    <path d="${glassesPath}" fill="none" stroke="${accessoryColor}" stroke-width="5"/>
+                </svg>
+            `;
+            break;
+    }
+
+    collar.style.backgroundColor = collarColor;
+    if (collarBellCheckbox.checked) {
+        collar.innerHTML = `
+            <svg viewBox="0 0 40 40" style="position: absolute; left: 50%; transform: translateX(-50%);">
+                <circle cx="20" cy="20" r="15" fill="${darkenColor(collarColor, 20)}"/>
+                <circle cx="20" cy="25" r="2" fill="#FFD700"/>
+                <rect x="18" y="10" width="4" height="15" fill="#FFD700"/>
+            </svg>
+        `;
+    } else {
+        collar.innerHTML = '';
+    }
+}
+
+// Color functions
+function lightenColor(color, percent) {
+    const num = parseInt(color.replace("#",""), 16),
+    amt = Math.round(2.55 * percent),
+    R = (num >> 16) + amt,
+    G = (num >> 8 & 0x00FF) + amt,
+    B = (num & 0x0000FF) + amt;
+    return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 + (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255)).toString(16).slice(1);
+}
+
+function darkenColor(color, percent) {
+    const num = parseInt(color.replace("#",""), 16),
+    amt = Math.round(2.55 * percent),
+    R = (num >> 16) - amt,
+    G = (num >> 8 & 0x00FF) - amt,
+    B = (num & 0x0000FF) - amt;
+    return "#" + (0x1000000 + (R>0?R<1?0:R:0)*0x10000 + (G>0?G<1?0:G:0)*0x100 + (B>0?B<1?0:B:0)).toString(16).slice(1);
+}
+
+furColorInput.addEventListener('input', updateKitty);
+eyeColorInput.addEventListener('input', updateKitty);
+angyLevelControl.addEventListener('input', updateKitty);
+furPatternSelect.addEventListener('change', updateKitty);
+eyeShapeSelect.addEventListener('change', updateKitty);
+accessoryTypeSelect.addEventListener('change', function() {
+    glassesVariantGroup.style.display = this.value === 'glasses' ? 'block' : 'none';
+    updateKitty();
+});
+glassesVariantSelect.addEventListener('change', updateKitty);
+accessoryColorInput.addEventListener('input', updateKitty);
+collarColorInput.addEventListener('input', updateKitty);
+collarBellCheckbox.addEventListener('change', updateKitty);
+emotionSelect.addEventListener('change', updateKitty);
+
+// Initial update
+updateKitty();
+</script>
+</body>
+</html>
