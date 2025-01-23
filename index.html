@@ -1,0 +1,41 @@
+<html>
+<head>
+  <title>Flappy Angy Kitty</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Flappy Angy Kitty</h1>
+    <div class="score-container">
+      <span>Score: </span>
+      <span id="score">0</span>
+      <span class="high-score">High Score: </span>
+      <span id="highScore">0</span>
+    </div>
+  </header>
+
+  <div class="game-container">
+    <div id="gameArea">
+      <div class="kitty" id="kitty">
+        <div class="ear ear-left"></div>
+        <div class="ear ear-right"></div>
+        <div class="eye eye-left"><div class="pupil"></div></div>
+        <div class="eye eye-right"><div class="pupil"></div></div>
+        <div class="nose"></div>
+        <div class="mouth"></div>
+      </div>
+    </div>
+    <div class="game-overlay" id="gameOverlay">
+      <h2>Flappy Angy Kitty</h2>
+      <p>Click or Press Space to Start</p>
+      <p class="game-over-score" id="gameOverScore"></p>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2023 Angy Kitty Inc. All rights reserved. Still No Pets Allowed.</p>
+  </footer>
+
+  <script src="game.js"></script>
+</body>
+</html>
