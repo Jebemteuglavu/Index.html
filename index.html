@@ -1,0 +1,584 @@
+<title>Monkey Typewriting Tycoon</title>
+<style>
+:root {
+  --primary: #8b4513;
+  --secondary: #deb887;
+  --accent: #32cd32;
+}
+
+body {
+  background: #f4eae2;
+  font-family: 'Courier New', monospace;
+  margin: 0;
+  padding: 20px;
+  color: var(--primary);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(400px, 2fr) 1fr;
+  gap: 20px;
+}
+
+.typing-area {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  height: 300px;
+  font-size: 18px;
+  line-height: 1.5;
+  word-wrap: break-word;
+  overflow: hidden;
+  white-space: pre-wrap; /* Preserve whitespace but allow wrapping */
+}
+
+.stats {
+  background: var(--secondary);
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.market {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.upgrade {
+  background: var(--accent);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  margin: 5px;
+  transition: transform 0.1s;
+}
+
+.upgrade:hover {
+  transform: scale(1.05);
+}
+
+.highlight {
+  background: #ffff00;
+  padding: 2px;
+  border-radius: 3px;
+}
+
+.highlight-word {
+  background-color: #ffff00;
+  border-radius: 3px;
+  transition: background-color 2s;
+}
+
+.monkey {
+  font-size: 24px;
+  margin: 10px 0;
+}
+
+.word-value {
+  position: absolute;
+  animation: float-up 1s ease-out forwards;
+  color: green;
+  font-weight: bold;
+}
+
+.word-stats {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.word-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px;
+  border-bottom: 1px solid #eee;
+  justify-content: space-between;
+}
+
+.word-progress {
+  flex-grow: 1;
+  height: 10px;
+  background: #eee;
+  border-radius: 5px;
+  overflow: hidden;
+  margin: 0 10px;
+}
+
+.word-progress-bar {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+.word-count {
+  min-width: 60px;
+  text-align: right;
+}
+
+.rebirth-btn {
+  background: #ff69b4;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+  margin-top: 20px;
+  width: 100%;
+  transition: transform 0.1s;
+}
+
+.rebirth-btn:hover {
+  transform: scale(1.05);
+}
+
+.trophies {
+  background: #ffd700;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.trophy {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  opacity: 0.5;
+}
+
+.trophy.unlocked {
+  opacity: 1;
+}
+
+@keyframes float-up {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+}
+
+.snackbar {
+  visibility: hidden;
+  min-width: 250px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 2px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+}
+
+.snackbar.show {
+  visibility: visible;
+  animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@keyframes fadein {
+  from {bottom: 0; opacity: 0;}
+  to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadeout {
+  from {bottom: 30px; opacity: 1;}
+  to {bottom: 0; opacity: 0;}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="main">
+    <h1>🐒 Monkey Typewriting Tycoon</h1>
+    <div class="typing-area" id="typingArea"></div>
+    <div class="word-stats">
+      <h2>Word Achievements</h2>
+      <div id="wordStats"></div>
+    </div>
+    <div class="trophies">
+      <h2>Trophies</h2>
+      <div id="trophyCase"></div>
+    </div>
+  </div>
+  <div class="sidebar">
+    <div class="stats">
+      <h2>Stats</h2>
+      <p>Money: $<span id="money">0</span></p>
+      <p>Characters per second: <span id="cps">3</span></p>
+      <p>Monkeys: <span id="monkeys">1</span></p>
+      <p>Next monkey costs: $<span id="monkeyCost">25</span></p>
+      <p>Next speed upgrade costs: $<span id="speedCost">10</span></p>
+      <p>Rebirth multiplier: <span id="rebirthMult">1</span>x</p>
+      <p>Next rebirth costs: $<span id="rebirthCost">50000</span></p>
+      
+      <button class="upgrade" onclick="buyMonkey()">Buy Monkey</button>
+      <button class="upgrade" onclick="upgradeCPS()">Upgrade Speed</button>
+      <button class="rebirth-btn" onclick="rebirth()">REBIRTH</button>
+    </div>
+    
+    <div class="market">
+      <h2>Character Market</h2>
+      <div id="charMarket"></div>
+    </div>
+  </div>
+</div>
+
+<div id="snackbar" class="snackbar"></div>
+
+<script>
+const state = {
+  money: 0,
+  cps: 3,
+  monkeys: 1,
+  text: '',
+  charProbabilities: {},
+  monkeyCost: 25,
+  speedCost: 10,
+  lastTyped: Date.now(),
+  charQueue: [],
+  wordCounts: {},
+  unlockedTrophies: new Set(),
+  rebirthMult: 1,
+  rebirthCost: 50000,
+  phrases: [
+    "to be or not to be",
+    "how are you doing",
+    "the quick brown fox",
+    "all's well that ends well",
+    "a tale told by an idiot"
+  ]
+};
+
+const trophies = [
+  { id: 'words10', name: '10 Different Words', requirement: 10, bonus: 'CPS +10' },
+  { id: 'words25', name: '25 Different Words', requirement: 25, bonus: 'CPS +20' },
+  { id: 'words50', name: '50 Different Words', requirement: 50, bonus: '10 Extra Monkeys' },
+  { id: 'words100', name: '100 Different Words', requirement: 100, bonus: '$1,000,000' }
+];
+
+const dictionary = new Set([
+  "the", "in", "on", "at", "to", "be", "of", "and", "or", "but", 
+  "for", "not", "with", "by", "from", "up", "about", "into", "over", "after",
+  "monkey", "banana", "type", "word", "book", "write", "read", "story", "tale",
+  "shakespeare", "author", "novel", "poem", "verse", "line", "page", "text",
+  "writer", "paper", "pen", "ink", "chapter", "plot", "draft", "edit",
+  "is", "are", "was", "were", "has", "have", "had", "do", "does", "did",
+  "can", "could", "will", "would", "should", "may", "might", "must", "go",
+  "went", "gone", "see", "saw", "seen", "eat", "ate", "run", "ran", "jump",
+  "time", "day", "year", "man", "woman", "child", "boy", "girl", "dog", "cat",
+  "house", "home", "room", "door", "window", "tree", "flower", "bird", "fish",
+  "sun", "moon", "star", "sky", "sea", "ocean", "river", "mountain", "hill",
+  "good", "bad", "big", "small", "hot", "cold", "new", "old", "young", "happy",
+  "sad", "fast", "slow", "high", "low", "long", "short", "rich", "poor", "red",
+  "blue", "green", "black", "white", "dark", "light", "hard", "soft", "loud",
+  "now", "then", "today", "tonight", "tomorrow", "yesterday", "soon", "later",
+  "early", "late", "morning", "afternoon", "evening", "night", "week", "month",
+  "one", "two", "three", "four", "five", "ten", "many", "much", "some", "any",
+  "all", "none", "few", "several", "every", "each", "both", "half", "twice",
+  "you", "he", "she", "it", "we", "they", "me", "him", "her", "us", "them",
+  "my", "your", "his", "our", "their", "mine", "yours", "this", "that", "these",
+  "who", "what", "where", "when", "why", "how", "which", "whose", "whom",
+  "hello", "goodbye", "yes", "no", "please", "thank", "sorry", "well", "very",
+  "quite", "rather", "just", "only", "also", "too", "more", "most", "again"
+]);
+
+'abcdefghijklmnopqrstuvwxyz '.split('').forEach(char => {
+  state.charProbabilities[char] = 1;
+});
+
+function updateDisplay() {
+  document.getElementById('money').textContent = state.money.toFixed(2);
+  document.getElementById('cps').textContent = state.cps;
+  document.getElementById('monkeys').textContent = state.monkeys;
+  document.getElementById('monkeyCost').textContent = state.monkeyCost;
+  document.getElementById('speedCost').textContent = state.speedCost;
+  
+  const wordStats = document.getElementById('wordStats');
+  const totalPossibleWords = dictionary.size;
+  const discoveredWords = Object.keys(state.wordCounts).length;
+  
+  wordStats.innerHTML = `
+    <div>Progress: ${discoveredWords}/${totalPossibleWords} words discovered</div>
+    <div class="word-progress">
+      <div class="word-progress-bar" style="width: ${(discoveredWords/totalPossibleWords)*100}%"></div>
+    </div>
+    ${Object.entries(state.wordCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([word, count]) => `
+        <div class="word-container">
+          <span>"${word}"</span>
+          <div class="word-count">${count} times</div>
+        </div>
+      `).join('')}
+  `;
+  
+  document.getElementById('rebirthMult').textContent = state.rebirthMult.toFixed(1);
+  document.getElementById('rebirthCost').textContent = state.rebirthCost.toFixed(0);
+  
+  const trophyCase = document.getElementById('trophyCase');
+  trophyCase.innerHTML = trophies.map(trophy => `
+    <div class="trophy ${state.unlockedTrophies.has(trophy.id) ? 'unlocked' : ''}">
+      🏆 ${trophy.name} - ${trophy.bonus}
+    </div>
+  `).join('');
+  
+  const typingArea = document.getElementById('typingArea');
+  typingArea.scrollTop = typingArea.scrollHeight;
+}
+
+function checkTrophies() {
+  const uniqueWords = Object.keys(state.wordCounts).length;
+  
+  trophies.forEach(trophy => {
+    if (!state.unlockedTrophies.has(trophy.id) && uniqueWords >= trophy.requirement) {
+      state.unlockedTrophies.add(trophy.id);
+      
+      switch(trophy.id) {
+        case 'words10':
+          state.cps += 10;
+          break;
+        case 'words25':
+          state.cps += 20;
+          break;
+        case 'words50':
+          state.monkeys += 10;
+          break;
+        case 'words100':
+          addMoney(1000000);
+          break;
+      }
+      
+      showFloatingText(`Trophy Unlocked: ${trophy.name}!`, 0);
+    }
+  });
+}
+
+function getRandomChar() {
+  const chars = Object.keys(state.charProbabilities);
+  const weights = Object.values(state.charProbabilities);
+  const totalWeight = weights.reduce((a, b) => a + b, 0);
+  let random = Math.random() * totalWeight;
+  
+  for (let i = 0; i < chars.length; i++) {
+    random -= weights[i];
+    if (random <= 0) return chars[i];
+  }
+  return ' ';
+}
+
+function checkForWords() {
+  let text = state.text.toLowerCase();
+  let highlights = [];
+  
+  // First check for phrases since they have highest priority
+  state.phrases.forEach(phrase => {
+    const lowerPhrase = phrase.toLowerCase();
+    if (text.includes(lowerPhrase)) {
+      addMoney(1000);
+      showFloatingText(phrase, 1000);
+      
+      const startIndex = text.indexOf(lowerPhrase);
+      highlights.push({
+        start: startIndex,
+        end: startIndex + phrase.length,
+        word: state.text.substring(startIndex, startIndex + phrase.length)
+      });
+      
+      text = text.replace(lowerPhrase, ' '.repeat(lowerPhrase.length));
+      state.text = text;
+    }
+  });
+
+  // Sort dictionary words by length (longest first)
+  const sortedWords = Array.from(dictionary).sort((a, b) => b.length - a.length);
+
+  sortedWords.forEach(word => {
+    const regex = new RegExp(word, 'g');
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      // Skip if this exact portion of text was already highlighted
+      let isAlreadyHighlighted = false;
+      for (let h of highlights) {
+        if (match.index >= h.start && match.index < h.end) {
+          isAlreadyHighlighted = true;
+          break;
+        }
+      }
+      if (isAlreadyHighlighted) continue;
+
+      let value = 0;
+      if (word.length === 2) {
+        value = 10;
+      } else if (word.length === 3) {
+        value = 100;
+      } else if (word.length === 4) {
+        value = 500;
+      } else if (word.length >= 5 && word.length <= 8) {
+        value = 2000;
+      } else if (word.length > 8) {
+        value = 10000;
+      }
+      addMoney(value);
+      showFloatingText(word, value);
+      
+      if (!state.wordCounts[word]) {
+        showSnackbar(`New word discovered: "${word}"!`);
+      }
+
+      state.wordCounts[word] = (state.wordCounts[word] || 0) + 1;
+      
+      highlights.push({
+        start: match.index,
+        end: match.index + word.length,
+        word: state.text.substring(match.index, match.index + word.length)
+      });
+      
+      text = text.substring(0, match.index) + ' '.repeat(word.length) + text.substring(match.index + word.length);
+    }
+  });
+  
+  highlights.sort((a, b) => b.start - a.start);
+  
+  const typingArea = document.getElementById('typingArea');
+  let finalText = state.text;
+  highlights.forEach(({start, end, word}) => {
+    const before = finalText.substring(0, start);
+    const after = finalText.substring(end);
+    finalText = before + `<span class="highlight-word">${word}</span>` + after;
+  });
+  
+  typingArea.innerHTML = finalText;
+  state.text = text; // Update the state text with the spaces-replaced version
+  
+  const highlightElements = typingArea.getElementsByClassName('highlight-word');
+  Array.from(highlightElements).forEach(el => {
+    setTimeout(() => {
+      el.style.backgroundColor = 'transparent';
+    }, 2000);
+  });
+  
+  checkTrophies();
+  updateDisplay();
+  
+  typingArea.scrollTop = typingArea.scrollHeight;
+}
+
+function showSnackbar(message) {
+  const snackbar = document.getElementById("snackbar");
+  snackbar.textContent = message;
+  snackbar.className = "snackbar show";
+  setTimeout(() => {
+    snackbar.className = "snackbar";
+  }, 3000);
+}
+
+function showFloatingText(text, value) {
+  const element = document.createElement('div');
+  element.className = 'word-value';
+  element.textContent = value > 0 ? `+$${value} (${text})` : text;
+  element.style.left = Math.random() * 80 + 10 + '%';
+  element.style.top = Math.random() * 80 + 10 + '%';
+  document.body.appendChild(element);
+  setTimeout(() => element.remove(), 1000);
+}
+
+function addMoney(amount) {
+  state.money += amount * state.rebirthMult;
+  updateDisplay();
+}
+
+function buyMonkey() {
+  if (state.money >= state.monkeyCost) {
+    state.money -= state.monkeyCost;
+    state.monkeys++;
+    state.monkeyCost = Math.floor(state.monkeyCost * 1.5);
+    updateDisplay();
+  }
+}
+
+function upgradeCPS() {
+  if (state.money >= state.speedCost) {
+    state.money -= state.speedCost;
+    state.cps++;
+    state.speedCost = Math.floor(state.speedCost * 1.5);
+    updateDisplay();
+  }
+}
+
+function rebirth() {
+  if (state.money >= state.rebirthCost) {
+    state.money -= state.rebirthCost;
+    state.rebirthMult += 0.5;
+    state.rebirthCost *= 2;
+    
+    state.cps = 3;
+    state.monkeys = 1;
+    state.monkeyCost = 25;
+    state.speedCost = 10;
+    
+    updateDisplay();
+  }
+}
+
+function updateCharMarket() {
+  const market = document.getElementById('charMarket');
+  market.innerHTML = '';
+  
+  Object.entries(state.charProbabilities).forEach(([char, prob]) => {
+    const button = document.createElement('button');
+    button.className = 'upgrade';
+    button.textContent = `Boost '${char}' ($25)`;
+    button.onclick = () => {
+      if (state.money >= 25) {
+        state.money -= 25;
+        state.charProbabilities[char] *= 1.5;
+        updateDisplay();
+      }
+    };
+    market.appendChild(button);
+  });
+}
+
+function typeNextChar() {
+  if (state.charQueue.length > 0) {
+    state.text += state.charQueue.shift();
+    if (state.text.length > 1000) {
+      state.text = state.text.substring(state.text.length - 1000);
+    }
+    checkForWords();
+  }
+  
+  const timeBetweenChars = 1000 / (state.monkeys * state.cps);
+  setTimeout(typeNextChar, timeBetweenChars);
+}
+
+setInterval(() => {
+  const charsToAdd = state.monkeys * state.cps;
+  for (let i = 0; i < charsToAdd; i++) {
+    state.charQueue.push(getRandomChar());
+  }
+}, 1000);
+
+updateDisplay();
+updateCharMarket();
+typeNextChar();
+</script>
+</body></html>
