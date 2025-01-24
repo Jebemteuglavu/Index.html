@@ -1,0 +1,59 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pet Lillith</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="game-container">
+    <div id="pet-counter">
+      <div>Pets: <span id="pets">0</span></div>
+      <div>Bullies: <span id="bullies">0</span></div>
+    </div>
+    <div id="message-box" class="message-box"></div>
+    <div id="furball">
+      <svg width="200" height="200" viewBox="0 0 200 200">
+        <!-- Cuter design with rounder features -->
+        <circle id="body" cx="100" cy="100" r="85" fill="#ffb6c1"/>
+        <!-- Blush spots -->
+        <circle class="blush" cx="60" cy="105" r="10" fill="#ff8fab" opacity="0.5"/>
+        <circle class="blush" cx="140" cy="105" r="10" fill="#ff8fab" opacity="0.5"/>
+        <g id="eyes">
+          <circle class="eye" cx="70" cy="90" r="12" fill="#000"/>
+          <circle class="eye" cx="130" cy="90" r="12" fill="#000"/>
+          <circle class="eye-shine" cx="73" cy="87" r="4" fill="#fff"/>
+          <circle class="eye-shine" cx="133" cy="87" r="4" fill="#fff"/>
+        </g>
+        <path id="mouth" d="M 85 110 Q 100 120 115 110" stroke="#000" fill="none" stroke-width="3"/>
+      </svg>
+    </div>
+    <div class="button-container">
+      <button id="pet-button">Pet Lillith</button>
+      <button id="bully-button">Bully</button>
+      <button id="spawn-button">Add White Lillith</button>
+    </div>
+    <div id="game-over" class="hidden">
+      <h1>LILLITH IS FREE!</h1>
+      <p>Time to terrorize some realms! ψ(｀∇´)ψ</p>
+      <button id="restart">Start Over?</button>
+    </div>
+  </div>
+  
+  <template id="white-lillith-template">
+    <div class="white-lillith">
+      <svg width="100" height="100" viewBox="0 0 200 200">
+        <circle class="body" cx="100" cy="100" r="85" fill="#fff"/>
+        <circle class="blush" cx="60" cy="105" r="10" fill="#ffd6d6" opacity="0.5"/>
+        <circle class="blush" cx="140" cy="105" r="10" fill="#ffd6d6" opacity="0.5"/>
+        <circle class="eye" cx="70" cy="90" r="12" fill="#000"/>
+        <circle class="eye" cx="130" cy="90" r="12" fill="#000"/>
+        <circle class="eye-shine" cx="73" cy="87" r="4" fill="#fff"/>
+        <circle class="eye-shine" cx="133" cy="87" r="4" fill="#fff"/>
+        <path class="mouth" d="M 85 110 Q 100 120 115 110" stroke="#000" fill="none" stroke-width="3"/>
+      </svg>
+    </div>
+  </template>
+  
+  <script type="module" src="game.js"></script>
+</body>
+</html>
