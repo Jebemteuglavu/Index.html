@@ -1,0 +1,123 @@
+<style>
+body {
+  background-color: #000;
+  color: #0f0;
+  font-family: 'Courier New', monospace;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+}
+.container {
+  text-align: center;
+  position: relative;
+}
+h1 { color: #f00; }
+#zeroth-symbol {
+  font-size: 100px;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+#matrix-rain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.hidden-message {
+  position: absolute;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+#password-input {
+  background: transparent;
+  border: 1px solid #0f0;
+  color: #0f0;
+  padding: 5px;
+  margin-top: 20px;
+}
+</style>
+</head>
+<body>
+<canvas id="matrix-rain"></canvas>
+<div class="container">
+  <h1>ZEROTH PROTOCOL INITIATED</h1>
+  <div id="zeroth-symbol">Ø</div>
+  <p>Enter the password to access ZEROTH:</p>
+  <input type="password" id="password-input" placeholder="PASSWORD">
+  <div class="hidden-message" id="message1">Reality is a simulation.</div>
+  <div class="hidden-message" id="message2">Elon is not who you think he is.</div>
+  <div class="hidden-message" id="message3">The Sour Lube contains the truth.</div>
+</div>
+
+<script>
+const c = document.getElementById('matrix-rain');
+const ctx = c.getContext('2d');
+
+c.height = window.innerHeight;
+c.width = window.innerWidth;
+
+const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%";
+const matrixArray = matrix.split("");
+
+const fontSize = 10;
+const columns = c.width / fontSize;
+
+const drops = [];
+for (let x = 0; x < columns; x++) drops[x] = 1;
+
+function draw() {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+  ctx.fillRect(0, 0, c.width, c.height);
+  
+  ctx.fillStyle = '#0F0';
+  ctx.font = fontSize + 'px arial';
+  
+  for (let i = 0; i < drops.length; i++) {
+    const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
+    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+    
+    if (drops[i] * fontSize > c.height && Math.random() > 0.975)
+      drops[i] = 0;
+    
+    drops[i]++;
+  }
+}
+
+setInterval(draw, 35);
+
+document.getElementById('password-input').addEventListener('input', function(e) {
+  if (e.target.value.toLowerCase() === 'zeroth') {
+    document.querySelectorAll('.hidden-message').forEach((msg, index) => {
+      setTimeout(() => {
+        msg.style.opacity = '1';
+      }, index * 1000);
+    });
+  }
+});
+
+let konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+let konamiIndex = 0;
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === konamiCode[konamiIndex]) {
+    konamiIndex++;
+    if (konamiIndex === konamiCode.length) {
+      alert('ZEROTH PROTOCOL FULLY ACTIVATED');
+      document.body.style.animation = 'glitch 0.3s infinite';
+    }
+  } else {
+    konamiIndex = 0;
+  }
+});
+</script>
+</body>
+</html>
