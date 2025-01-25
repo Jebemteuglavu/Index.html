@@ -1,0 +1,121 @@
+<html>
+<head>
+    <title>BananaOS 🍌</title>
+    <link rel="stylesheet" href="https://unpkg.com/98.css">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="loading-screen">
+        <div class="loading-window">
+            <div class="loading-title">
+                <span>BananaOS Setup</span>
+                <button aria-label="Close"></button>
+            </div>
+            <div class="loading-content">
+                <img src="/BANANA-OS!.png" alt="Banana OS Logo">
+                <div class="loading-text">Please wait while BananaOS loads your banana configuration...</div>
+                <div class="loading-bar">
+                    <div class="loading-progress"></div>
+                </div>
+                <div class="loading-text" id="loading-status">Initializing system components...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="desktop">
+        <div class="icons">
+            <div class="icon" ondblclick="openApp('notepad')">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cstyle%3E.pixel%7Bshape-rendering:crispEdges%7D%3C/style%3E%3Cg class='pixel'%3E%3Cpath fill='%23FFD700' d='M3 2h10v12H3z'/%3E%3Cpath fill='%23FFB700' d='M3 2h10v2H3z'/%3E%3Cpath fill='%23704D00' d='M4 6h8v1H4zM4 8h8v1H4zM4 10h6v1H4z'/%3E%3Cpath fill='%23FFB700' d='M10 10h2v3h-2z'/%3E%3Cpath fill='%23704D00' d='M10 12h2v1H10zM3 2h1v12H3zM12 2h1v12h-1zM3 14h10v1H3zM3 1h10v1H3z'/%3E%3C/g%3E%3C/svg%3E">
+                <span>BananaPad</span>
+            </div>
+            <div class="icon" ondblclick="openApp('horror')">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cstyle%3E.pixel%7Bshape-rendering:crispEdges%7D%3C/style%3E%3Cg class='pixel'%3E%3Cpath fill='%23800000' d='M0 0h16v16H0z'/%3E%3Cpath fill='%23FFD700' d='M6 4h4v8H6z'/%3E%3Cpath fill='%23FF0000' d='M7 6h2v2H7zM7 9h2v2H7zM7 11h2v2H7z'/%3E%3Cpath fill='%23FFA500' d='M5 8h6v2H5z'/%3E%3C/g%3E%3C/svg%3E">
+                <span>BananaHorror</span>
+            </div>
+            <div class="icon" ondblclick="openApp('gravity')">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cstyle%3E.pixel%7Bshape-rendering:crispEdges%7D%3C/style%3E%3Cg class='pixel'%3E%3Cpath fill='%2387CEEB' d='M0 0h16v16H0z'/%3E%3Cpath fill='%23FFD700' d='M4 4h2v2H4zM8 8h2v2H8zM12 6h2v2h-2zM6 10h2v2H6z'/%3E%3Cpath fill='%238B4513' d='M0 14h16v2H0z'/%3E%3Cpath fill='%23FFB700' d='M4 5h2v1H4zM8 9h2v1H8zM12 7h2v1h-2zM6 11h2v1H6z'/%3E%3C/g%3E%3C/svg%3E">
+                <span>BananaGravity</span>
+            </div>
+            <div class="icon" ondblclick="openApp('farming')">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cstyle%3E.pixel%7Bshape-rendering:crispEdges%7D%3C/style%3E%3Cg class='pixel'%3E%3Cpath fill='%238B4513' d='M0 12h16v4H0z'/%3E%3Cpath fill='%2332CD32' d='M2 8h2v4H2zM6 6h2v6H6zM10 7h2v5h-2zM12 9h2v3h-2z'/%3E%3Cpath fill='%23FFD700' d='M3 6h1v2H3zM7 4h1v2H7zM11 5h1v2h-1zM13 7h1v2h-1z'/%3E%3Cpath fill='%2387CEEB' d='M0 0h16v4H0z'/%3E%3C/g%3E%3C/svg%3E">
+                <span>BananaFarm</span>
+            </div>
+            <div class="icon" ondblclick="openApp('paint')">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cstyle%3E.pixel%7Bshape-rendering:crispEdges%7D%3C/style%3E%3Cg class='pixel'%3E%3Cpath fill='%23FFD700' d='M3 2h10v12H3z'/%3E%3Cpath fill='%23FFB700' d='M3 2h10v2H3zM5 11h4v3H5z'/%3E%3Cpath fill='%23704D00' d='M7 5h1v1H7zM8 6h1v1H8zM9 7h1v1H9zM10 8h1v1h-1zM6 4h1v1H6zM5 5h1v1H5zM4 6h1v1H4zM3 2h1v12H3zM12 2h1v12h-1zM3 14h10v1H3zM3 1h10v1H3z'/%3E%3C/g%3E%3C/svg%3E">
+                <span>BananaPaint</span>
+            </div>
+            <div class="icon" ondblclick="openApp('calculator')">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cstyle%3E.pixel%7Bshape-rendering:crispEdges%7D%3C/style%3E%3Cg class='pixel'%3E%3Cpath fill='%23FFD700' d='M4 2h8v12H4z'/%3E%3Cpath fill='%23FFB700' d='M4 2h8v3H4zM8 11h2v3H8z'/%3E%3Cpath fill='%23704D00' d='M5 7h2v1H5zM9 7h2v1H9zM5 9h2v1H5zM9 9h2v1H9zM5 11h2v1H5zM9 11h2v1H9zM4 2h1v12H4zM11 2h1v12h-1zM4 14h8v1H4zM4 1h8v1H4z'/%3E%3C/g%3E%3C/svg%3E">
+                <span>BananaCalc</span>
+            </div>
+            <div class="icon" ondblclick="openApp('game')">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cstyle%3E.pixel%7Bshape-rendering:crispEdges%7D%3C/style%3E%3Cg class='pixel'%3E%3Cpath fill='%2300CED1' d='M0 0h16v16H0z'/%3E%3Cpath fill='%2332CD32' d='M0 12h16v4H0z'/%3E%3Cpath fill='%23FFD700' d='M4 8h2v4H4zM10 4h2v2h-2zM7 9h2v3H7z'/%3E%3Cpath fill='%23FFB700' d='M4 10h2v2H4zM10 5h2v1h-2zM7 10h2v2H7z'/%3E%3Cpath fill='%23FF6B6B' d='M12 10h2v2h-2z'/%3E%3Cpath fill='%234169E1' d='M2 9h1v1H2zM3 10h1v1H3z'/%3E%3Cpath fill='white' d='M1 3l1 1 1-1 1 1 1-1 1 1 1-1 1 1 1-1 1 1 1-1 1 1 1-1 1 1 1-1'/%3E%3C/g%3E%3C/svg%3E">
+                <span>BananaJump</span>
+            </div>
+            <div class="icon" ondblclick="openApp('settings')">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cstyle%3E.pixel%7Bshape-rendering:crispEdges%7D%3C/style%3E%3Cg class='pixel'%3E%3Cpath fill='%23FFD700' d='M6 2h4v12H6z'/%3E%3Cpath fill='%23FFB700' d='M6 8h4v6H6z'/%3E%3Cpath fill='%23704D00' d='M7 4h2v2H7zM7 7h2v2H7zM7 10h2v2H7z'/%3E%3Cpath fill='%23FFB700' d='M4 6h8v2H4z'/%3E%3C/g%3E%3C/svg%3E">
+                <span>Settings</span>
+            </div>
+            <div class="icon" ondblclick="openApp('wiki')">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cstyle%3E.pixel%7Bshape-rendering:crispEdges%7D%3C/style%3E%3Cg class='pixel'%3E%3Cpath fill='%23FFD700' d='M3 2h10v12H3z'/%3E%3Cpath fill='%23FFB700' d='M3 2h10v2H3z'/%3E%3Cpath fill='%23704D00' d='M4 6h8v1H4zM4 8h8v1H4zM4 10h8v1H4zM4 12h8v1H4zM3 2h1v12H3zM12 2h1v12h-1zM3 14h10v1H3zM3 1h10v1H3z'/%3E%3Cpath fill='%23FFB700' d='M5 7h2v3H5z'/%3E%3C/g%3E%3C/svg%3E">
+                <span>BananaWiki</span>
+            </div>
+            <div class="icon" ondblclick="openApp('about')">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cstyle%3E.pixel%7Bshape-rendering:crispEdges%7D%3C/style%3E%3Cg class='pixel'%3E%3Cpath fill='%23FFD700' d='M7 2h2v2H7zM7 5h2v9H7z'/%3E%3Cpath fill='%23FFB700' d='M7 2h1v2H7zM7 5h1v9H7z'/%3E%3Ccircle fill='none' stroke='%23704D00' stroke-width='1' cx='8' cy='8' r='6'/%3E%3C/g%3E%3C/svg%3E">
+                <span>About</span>
+            </div>
+            <div class="icon" ondblclick="openApp('assistant')">
+                <img src="/banana assistant.png">
+                <span>BananaGPT</span>
+            </div>
+            <div class="icon" ondblclick="openApp('browser')">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cstyle%3E.pixel%7Bshape-rendering:crispEdges%7D%3C/style%3E%3Cg class='pixel'%3E%3Ccircle fill='%23FFD700' cx='8' cy='8' r='7'/%3E%3Cpath fill='%23FFB700' d='M8 1v14A7 7 0 0 0 8 1z'/%3E%3Cpath fill='%23704D00' d='M8 1v14M1 8h14'/%3E%3C/g%3E%3C/svg%3E">
+                <span>BananaBrowser</span>
+            </div>
+            <div class="icon" ondblclick="openApp('store')">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cstyle%3E.pixel%7Bshape-rendering:crispEdges%7D%3C/style%3E%3Cg class='pixel'%3E%3Cpath fill='%23FFD700' d='M2 4h12v8H2z'/%3E%3Cpath fill='%23FFB700' d='M4 6h8v4H4z'/%3E%3Cpath fill='%23704D00' d='M6 8h4v2H6z'/%3E%3C/g%3E%3C/svg%3E">
+                <span>BananaStore</span>
+            </div>
+        </div>
+        
+        <div class="taskbar">
+            <button class="start-button" onclick="toggleStartMenu()">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cstyle%3E.pixel%7Bshape-rendering:crispEdges%7D%3C/style%3E%3Cg class='pixel'%3E%3Cpath fill='%23FFD700' d='M4 4h8v8H4z'/%3E%3Cpath fill='%23FFB700' d='M6 6h4v4H6z'/%3E%3Cpath fill='%23704D00' d='M4 4h1v8H4zM11 4h1v8h-1zM4 12h8v1H4zM4 3h8v1H4zM7 8h2v1H7zM8 9h1v1H8z'/%3E%3C/g%3E%3C/svg%3E">
+                Banana Start
+            </button>
+            <div class="start-menu">
+                <div class="start-menu-item" onclick="openApp('about')">
+                    <span>🍌</span>
+                    <span>About BananaOS</span>
+                </div>
+                <div class="start-menu-divider"></div>
+                <div class="start-menu-item" onclick="openApp('settings')">
+                    <span>⚙️</span>
+                    <span>Settings</span>
+                </div>
+                <div class="start-menu-item" onclick="openApp('wiki')">
+                    <span>📚</span>
+                    <span>BananaWiki</span>
+                </div>
+                <div class="start-menu-divider"></div>
+                <div class="start-menu-item" onclick="location.reload()">
+                    <span>🔄</span>
+                    <span>Restart</span>
+                </div>
+            </div>
+            <div class="time"></div>
+        </div>
+    </div>
+
+    <div id="apps"></div>
+
+    <script src="game.js"></script>
+    <script src="horror.js"></script>
+    <script src="gravity.js"></script>
+    <script src="farming.js"></script>
+    <script src="apps.js"></script>
+    <script src="main.js"></script>
+    <script src="store.js"></script ')"></script>
+</body>
+</html>
