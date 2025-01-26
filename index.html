@@ -1,0 +1,92 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pebble from Dandy's World</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="game-container">
+    <div id="pebble-info">
+      <h1>Pebble - Dandy's World Character</h1>
+      <p>Pebble is a unique character from the popular Roblox game Dandy's World. Known for their adorable appearance and playful personality, Pebble has captured the hearts of many players.</p>
+    </div>
+    <div id="pebble-stats">
+      <div class="stat">Happiness: <span id="happiness-value">100</span>%</div>
+      <div class="stat">Hunger: <span id="hunger-value">0</span>%</div>
+      <div class="stat">Energy: <span id="energy-value">100</span>%</div>
+    </div>
+    <div id="pebble-character">
+      <img src="/Pebble_Render.png" alt="Pebble" id="pebble-image">
+      <div id="twisted-finn-overlay" class="hidden">
+        <img src="/Twisted_Finn_Render.png" alt="Twisted Finn" id="twisted-finn-image">
+      </div>
+      <div id="twisted-boxten-overlay" class="hidden">
+        <img src="/Twisted_Boxten_Render.png" alt="Twisted Boxten" id="twisted-boxten-image">
+      </div>
+    </div>
+    <div id="action-buttons">
+      <button id="feed-btn">Feed</button>
+      <button id="play-btn">Play</button>
+      <button id="sleep-btn">Sleep</button>
+      <button id="update-log-btn">Update Log</button>
+    </div>
+    <div id="character-details">
+      <h2>About Pebble</h2>
+      <ul>
+        <li>Origin: Roblox Dandy's World</li>
+        <li>Personality: Cute and energetic</li>
+        <li>Favorite Activities: Playing and exploring</li>
+        <li>Special Trait: Adorable four-petal flower cheek design</li>
+      </ul>
+      
+      <div id="twisted-info">
+        <h2>What is a Twisted?</h2>
+        <p>In Dandy's World, a Twisted is a mysterious and potentially dangerous entity that randomly appears to challenge or threaten characters like Pebble. These dark, menacing creatures emerge unexpectedly, creating tension and excitement in the game.</p>
+        <ul>
+          <li>Appearance: Dark, with glowing red eyes and a threatening demeanor</li>
+          <li>Behavior: Suddenly appears to create chaos or test the player's reflexes</li>
+          <li>Challenge: Players must quickly react to dismiss or avoid the Twisted</li>
+          <li>Game Mechanic: Adds an element of surprise and quick-time interaction</li>
+        </ul>
+      </div>
+      
+      <div id="suggestion-section">
+        <h3>Got an Idea?</h3>
+        <p>If you have a suggestion to improve Pebble's game, leave a comment! The developers are always excited to hear new ideas!</p>
+        <p><strong>Comment something you want to add, and it might just become part of the game!</strong></p>
+      </div>
+    </div>
+    <div id="twisted-list-section">
+      <h2>Twisted Characters in Dandy's World</h2>
+      <div class="twisted-grid">
+        <div class="twisted-card">
+          <img src="/Twisted_Finn_Render.png" alt="Twisted Finn">
+          <h3>Twisted Finn</h3>
+          <p>A dark, menacing version of Finn with glowing red eyes and a terrifying grin.</p>
+          <div class="twisted-stats">
+            <span>Threat Level: High</span>
+            <span>Encounter Rate: Frequent</span>
+          </div>
+        </div>
+        <div class="twisted-card">
+          <img src="/Twisted_Boxten_Model.png" alt="Twisted Boxten">
+          <h3>Twisted Boxten</h3>
+          <p>A mysterious, purple box-like creature with an ominous presence.</p>
+          <div class="twisted-stats">
+            <span>Threat Level: Medium</span>
+            <span>Encounter Rate: Occasional</span>
+          </div>
+        </div>
+        <!-- More Twisted characters can be added here in future -->
+      </div>
+    </div>
+    <div id="character-log-section">
+      <h2>Character Log</h2>
+      <div id="character-log">
+        <!-- Log entries will be dynamically added here -->
+      </div>
+    </div>
+  </div>
+  <script type="module" src="game.js"></script>
+</body>
+</html>
