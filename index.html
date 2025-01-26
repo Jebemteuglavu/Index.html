@@ -1,0 +1,315 @@
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow-x: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    body {
+        font-family: 'Comic Sans MS', cursive;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23E8F5E9"/><path d="M0 0h10v100h-10zM20 0h5v100h-5zM35 0h8v100h-8zM55 0h6v100h-6zM70 0h10v100h-10zM90 0h5v100h-5z" fill="%2381C784"/></svg>');
+        background-repeat: repeat;
+        color: #4E342E;
+        line-height: 1.6;
+        text-align: center;
+    }
+    .container {
+        width: 95%;
+        max-width: 800px;
+        margin: auto;
+        padding: 10px;
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 20px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    header {
+        background: rgba(60, 179, 113, 0.8);
+        color: #fff;
+        padding: 10px 0;
+        border-radius: 20px 20px 0 0;
+        width: 100%;
+    }
+    h1 {
+        font-size: 2.5em;
+        text-shadow: 2px 2px #2F4F4F;
+        animation: sway 4s ease-in-out infinite;
+        margin: 0;
+    }
+    h2 {
+        font-size: 1.8em;
+        color: #3E2723;
+    }
+    p {
+        font-size: 1.2em;
+        margin-bottom: 15px;
+    }
+    @keyframes sway {
+        0%, 100% { transform: rotate(-5deg); }
+        50% { transform: rotate(5deg); }
+    }
+    #game-container {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        margin: 20px auto;
+    }
+    #game-area {
+        width: 100%;
+        height: 400px;
+        position: relative;
+        background: rgba(167, 199, 167, 0.7);
+        border: 10px solid #3CB371;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        cursor: pointer;
+    }
+    #sloth {
+        width: 150px;
+        height: 150px;
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><ellipse cx="100" cy="100" rx="80" ry="70" fill="%23876445"/><circle cx="70" cy="80" r="10" fill="%23000"/><circle cx="130" cy="80" r="10" fill="%23000"/><path d="M80 120 Q100 140 120 120" stroke="%23000" fill="none" stroke-width="5"/><path d="M20 100 Q-20 150 40 180" stroke="%23876445" fill="none" stroke-width="15"/><path d="M180 100 Q220 150 160 180" stroke="%23876445" fill="none" stroke-width="15"/><ellipse cx="80" cy="190" rx="15" ry="10" fill="%23876445"/><ellipse cx="120" cy="190" rx="15" ry="10" fill="%23876445"/></svg>');
+        background-size: contain;
+        background-repeat: no-repeat;
+        transition: transform 0.3s ease;
+        z-index: 5;
+    }
+    @keyframes jump {
+        0%, 100% { transform: translateX(-50%) translateY(0); }
+        50% { transform: translateX(-50%) translateY(-30px); }
+    }
+    .leaf, .poop {
+        width: 40px;
+        height: 40px;
+        position: absolute;
+        background-size: contain;
+        background-repeat: no-repeat;
+        cursor: pointer;
+        z-index: 10;
+    }
+    .leaf {
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 10 Q90 50 50 90 Q10 50 50 10Z" fill="%234CAF50"/></svg>');
+    }
+    .poop {
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 10 C20 10 10 30 10 50 C10 80 30 90 50 90 C70 90 90 80 90 50 C90 30 80 10 50 10 Z" fill="%238B4513"/></svg>');
+    }
+    #score-board {
+        font-size: 28px;
+        margin-bottom: 20px;
+        background-color: rgba(76, 175, 80, 0.8);
+        color: white;
+        padding: 10px;
+        border-radius: 10px;
+    }
+    #sloth-says {
+        position: absolute;
+        top: -40px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 1.2em;
+        padding: 5px;
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 10px;
+        z-index: 20;
+    }
+    #start-prompt {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 2em;
+        font-weight: bold;
+        color: #3E2723;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        z-index: 15;
+    }
+    @media (max-width: 600px) {
+        h1 { font-size: 2em; }
+        h2 { font-size: 1.5em; }
+        p { font-size: 1em; }
+        #score-board { font-size: 24px; }
+        #sloth { width: 100px; height: 100px; }
+        .leaf, .poop { width: 30px; height: 30px; }
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Bryn's Leaf-tastic Feast!</h1>
+        </header>
+
+        <div id="score-board">
+            Current Score: <span id="current-score">0</span> | High Score: <span id="high-score">0</span>
+        </div>
+        <div id="game-container">
+            <div id="sloth-says"></div>
+            <div id="game-area">
+                <div id="sloth"></div>
+                <div id="start-prompt">BEGIN THE FEAST</div>
+            </div>
+        </div>
+
+        <h2>Meet Bryn: The Sloth Who Put the "Fast" in "Breakfast"!</h2>
+        <p>🦥 Hold onto your eucalyptus, folks! Bryn isn't your average sloth-poke. While other sloths are still deciding whether to wake up, Bryn's already planned his 17-course leaf extravaganza with a side of dew-ccino! With arms longer than a giraffe's gossip and legs stubbier than a corgi's career as a runway model, Bryn's built for extreme leaf munching. His motto? "Eat leaves now, ask questions later... much later." Legend has it, Bryn once finished breakfast before the early bird even got the worm. Now that's what we call putting the "fast" in breakfast! 🌿⚡😄</p>
+
+        <h2>How to Play:</h2>
+        <p>Click falling leaves to feed our speedy sloth, Bryn. Don't let leaves hit the ground or Bryn might get hangry! Avoid the poops or Bryn will lose his appetite. Can you keep up with Bryn's insatiable hunger? Let's find out!</p>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('game-area');
+        const sloth = document.getElementById('sloth');
+        const currentScoreDisplay = document.getElementById('current-score');
+        const highScoreDisplay = document.getElementById('high-score');
+        const slothSays = document.getElementById('sloth-says');
+        const startPrompt = document.getElementById('start-prompt');
+        let score = 0;
+        let highScore = 0;
+        let leafCount = 0;
+        let gameStarted = false;
+        let leafInterval;
+        let poopInterval;
+
+        const slothQuotes = [
+            "Leaf me alone, I'm eating!",
+            "I'm on a roll... slowly.",
+            "Slow and steady wins... food!",
+            "Faster than my shadow... sometimes.",
+            "Living life in the fast lane!",
+            "Speed eating champion right here!"
+        ];
+
+        const poopQuotes = [
+            "Yuck! Not my cup of tea!",
+            "That's not leafy goodness!",
+            "My taste buds are offended!",
+            "I'm a leaf eater, not this!",
+            "Ew, who ordered this dish?",
+            "This isn't on my menu!"
+        ];
+
+        function startGame() {
+            if (!gameStarted) {
+                gameStarted = true;
+                startPrompt.style.display = 'none';
+                updateGameSpeed();
+            }
+        }
+
+        function createLeaf() {
+            const leaf = document.createElement('div');
+            leaf.classList.add('leaf');
+            leaf.style.left = Math.random() * (gameArea.offsetWidth - 40) + 'px';
+            leaf.style.top = '-40px';
+            leaf.addEventListener('click', feedSloth);
+            gameArea.appendChild(leaf);
+
+            const fallSpeed = 2;
+            let fall = setInterval(() => {
+                if (!gameStarted) {
+                    clearInterval(fall);
+                    return;
+                }
+                let topPosition = parseInt(leaf.style.top) || 0;
+                if (topPosition >= gameArea.offsetHeight - 40) {
+                    clearInterval(fall);
+                    gameArea.removeChild(leaf);
+                    missedLeaf();
+                } else {
+                    leaf.style.top = (topPosition + fallSpeed) + 'px';
+                }
+            }, 20);
+        }
+
+        function createPoop() {
+            const poop = document.createElement('div');
+            poop.classList.add('poop');
+            poop.style.left = Math.random() * (gameArea.offsetWidth - 40) + 'px';
+            poop.style.top = '-40px';
+            poop.addEventListener('click', clickPoop);
+            gameArea.appendChild(poop);
+
+            const fallSpeed = 2;
+            let fall = setInterval(() => {
+                if (!gameStarted) {
+                    clearInterval(fall);
+                    return;
+                }
+                let topPosition = parseInt(poop.style.top) || 0;
+                if (topPosition >= gameArea.offsetHeight - 40) {
+                    clearInterval(fall);
+                    gameArea.removeChild(poop);
+                } else {
+                    poop.style.top = (topPosition + fallSpeed) + 'px';
+                }
+            }, 20);
+        }
+
+        function feedSloth(event) {
+            event.target.remove();
+            sloth.style.animation = 'jump 0.5s ease';
+            setTimeout(() => {
+                sloth.style.animation = 'none';
+            }, 500);
+
+            score++;
+            leafCount++;
+            updateScore();
+
+            if (leafCount % 20 === 0) {
+                slothSays.textContent = slothQuotes[Math.floor(Math.random() * slothQuotes.length)];
+                setTimeout(() => {
+                    slothSays.textContent = '';
+                }, 3000);
+            }
+
+            if (score === 10 && !poopInterval) {
+                poopInterval = setInterval(createPoop, 10000);
+            }
+        }
+
+        function clickPoop(event) {
+            event.target.remove();
+            score = 0;
+            updateScore();
+            slothSays.textContent = poopQuotes[Math.floor(Math.random() * poopQuotes.length)];
+            setTimeout(() => {
+                slothSays.textContent = '';
+            }, 3000);
+        }
+
+        function missedLeaf() {
+            score = Math.max(0, score - 1);
+            updateScore();
+        }
+
+        function updateScore() {
+            currentScoreDisplay.textContent = score;
+            if (score > highScore) {
+                highScore = score;
+                highScoreDisplay.textContent = highScore;
+            }
+            updateGameSpeed();
+        }
+
+        function updateGameSpeed() {
+            clearInterval(leafInterval);
+            const leafRate = 1000 / Math.min(Math.floor(score / 10) + 1, 100);
+            leafInterval = setInterval(createLeaf, leafRate);
+        }
+
+        gameArea.addEventListener('click', startGame);
+    </script>
+</body></html>
