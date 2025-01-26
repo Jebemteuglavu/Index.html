@@ -1,0 +1,440 @@
+<style>
+body {
+  background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  font-family: "Comic Sans MS", cursive;
+  overflow: hidden;
+}
+
+.background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+}
+
+.cloud {
+  fill: white;
+  opacity: 0.9;
+  animation: float 20s infinite linear;
+}
+
+@keyframes float {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100vw); }
+}
+
+.rainbow-arc {
+  animation: rainbow-shine 5s linear infinite;
+  stroke-width: 20;
+  fill: none;
+  opacity: 0.7;
+}
+
+@keyframes rainbow-shine {
+  0% { stroke: rgba(255, 179, 186, 0.8); }
+  17% { stroke: rgba(186, 255, 201, 0.8); }
+  33% { stroke: rgba(186, 225, 255, 0.8); }
+  50% { stroke: rgba(255, 255, 186, 0.8); }
+  67% { stroke: rgba(255, 179, 247, 0.8); }
+  83% { stroke: rgba(255, 215, 186, 0.8); }
+  100% { stroke: rgba(255, 179, 186, 0.8); }
+}
+
+.poop {
+  position: relative;
+  animation: bounce 1s ease-in-out infinite alternate;
+  z-index: 2;
+}
+
+.pan-pink { fill: #ff1b8d; }
+.pan-yellow { fill: #ffd700; }
+.pan-blue { fill: #1e90ff; }
+
+.rainbow {
+  fill: #ffb6c1; /* Light pink */
+}
+
+.wing {
+  animation: flap 0.5s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+.left-wing {
+  transform-origin: 40px 100px;
+}
+
+.right-wing {
+  transform-origin: 160px 100px;
+}
+
+@keyframes flap {
+  from {
+    transform: rotateY(0deg) rotateZ(0deg);
+  }
+  to {
+    transform: rotateY(30deg) rotateZ(15deg);
+  }
+}
+
+.right-wing {
+  animation-direction: alternate-reverse;
+}
+
+.friend {
+  position: absolute;
+  right: 50px;
+  top: 50px;
+}
+
+.unicorn-horn {
+  fill: #ffb6c1;
+  stroke: #ff69b4;
+  stroke-width: 2;
+}
+
+.tongue {
+  animation: tongue-wiggle 0.5s infinite alternate;
+  transform-origin: center;
+}
+
+@keyframes tongue-wiggle {
+  from { transform: translateY(0); }
+  to { transform: translateY(2px); }
+}
+
+/* Add styles for name tag */
+.name-tag {
+  font-family: "Comic Sans MS", cursive;
+  fill: #ff69b4;
+  font-size: 14px;
+}
+
+/* Add styles for Sunshine's horn and mane */
+.sunshine-horn {
+  fill: #87CEEB;
+  stroke: #4169E1;
+  stroke-width: 2;
+}
+
+.sunshine-mane {
+  animation: flow 3s ease-in-out infinite;
+}
+
+@keyframes flow {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(5deg); }
+}
+
+.status-bar {
+  position: fixed;
+  bottom: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 15px;
+  border-radius: 15px;
+  display: flex;
+  gap: 20px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 14px;
+}
+
+.stat-value {
+  width: 100px;
+  height: 20px;
+  background: #eee;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.stat-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.happiness-fill { background: #FFB6C1; }
+.hunger-fill { background: #98FB98; }
+.energy-fill { background: #87CEEB; }
+
+.action-buttons {
+  position: fixed;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.action-btn {
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  font-family: "Comic Sans MS", cursive;
+  transition: transform 0.2s;
+}
+
+.action-btn:hover {
+  transform: scale(1.1);
+}
+
+.heart {
+  position: absolute;
+  font-size: 20px;
+  pointer-events: none;
+  animation: float-up 1s forwards;
+}
+
+@keyframes float-up {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+}
+</style>
+<script>
+const moveSpeed = 5;
+let poopX = window.innerWidth / 2 - 150;
+let poopY = window.innerHeight / 2 - 150;
+let friendX = window.innerWidth - 200;
+let friendY = 50;
+
+document.addEventListener('keydown', (e) => {
+  const poop = document.querySelector('.poop');
+  const friend = document.querySelector('.friend');
+  
+  switch(e.key.toLowerCase()) {
+    case 'w':
+      poopY -= moveSpeed;
+      break;
+    case 's':
+      poopY += moveSpeed;
+      break;
+    case 'a':
+      poopX -= moveSpeed;
+      break;
+    case 'd':
+      poopX += moveSpeed;
+      break;
+    case 'i':
+      friendY -= moveSpeed;
+      break;
+    case 'k':
+      friendY += moveSpeed;
+      break;
+    case 'j':
+      friendX -= moveSpeed;
+      break;
+    case 'l':
+      friendX += moveSpeed;
+      break;
+  }
+  
+  poop.style.position = 'absolute';
+  poop.style.left = poopX + 'px';
+  poop.style.top = poopY + 'px';
+  
+  friend.style.left = friendX + 'px';
+  friend.style.top = friendY + 'px';
+});
+
+// Pet stats
+let stats = {
+  poopoo: {
+    happiness: 100,
+    hunger: 100,
+    energy: 100
+  },
+  sunshine: {
+    happiness: 100,
+    hunger: 100,
+    energy: 100
+  }
+};
+
+// Update stats every 10 seconds
+setInterval(() => {
+  ['poopoo', 'sunshine'].forEach(pet => {
+    stats[pet].hunger = Math.max(0, stats[pet].hunger - 2);
+    stats[pet].energy = Math.max(0, stats[pet].energy - 1);
+    stats[pet].happiness = Math.max(0, stats[pet].happiness - 1);
+    updateStats();
+  });
+}, 10000);
+
+function updateStats() {
+  ['poopoo', 'sunshine'].forEach(pet => {
+    Object.keys(stats[pet]).forEach(stat => {
+      const fill = document.querySelector(`.${pet}-${stat}-fill`);
+      fill.style.width = `${stats[pet][stat]}%`;
+    });
+  });
+}
+
+function feed(pet) {
+  stats[pet].hunger = Math.min(100, stats[pet].hunger + 30);
+  stats[pet].happiness = Math.min(100, stats[pet].happiness + 10);
+  createHeart(pet);
+  updateStats();
+}
+
+function play(pet) {
+  if (stats[pet].energy > 20) {
+    stats[pet].happiness = Math.min(100, stats[pet].happiness + 30);
+    stats[pet].energy = Math.max(0, stats[pet].energy - 20);
+    createHeart(pet);
+    updateStats();
+  }
+}
+
+function sleep(pet) {
+  stats[pet].energy = Math.min(100, stats[pet].energy + 50);
+  updateStats();
+}
+
+function createHeart(pet) {
+  const heart = document.createElement('div');
+  heart.textContent = '❤️';
+  heart.className = 'heart';
+  const petElement = document.querySelector(`.${pet}`);
+  const rect = petElement.getBoundingClientRect();
+  heart.style.left = `${rect.left + rect.width/2}px`;
+  heart.style.top = `${rect.top}px`;
+  document.body.appendChild(heart);
+  setTimeout(() => heart.remove(), 1000);
+}
+</script>
+</head>
+<body>
+
+<svg class="background">
+  <!-- Clouds -->
+  <path class="cloud" d="M50,50 C30,50 20,40 30,30 C40,20 60,20 70,30 C80,20 100,20 110,30 C120,40 110,50 90,50 Z" 
+        style="animation-delay: -5s"/>
+  <path class="cloud" d="M150,80 C130,80 120,70 130,60 C140,50 160,50 170,60 C180,50 200,50 210,60 C220,70 210,80 190,80 Z"
+        style="animation-delay: -2s"/>
+  <path class="cloud" d="M250,40 C230,40 220,30 230,20 C240,10 260,10 270,20 C280,10 300,10 310,20 C320,30 310,40 290,40 Z"
+        style="animation-delay: -8s"/>
+  
+  <!-- Rainbow -->
+  <path class="rainbow-arc" d="M-100,400 Q400,100 900,400" />
+  <path class="rainbow-arc" d="M-100,420 Q400,120 900,420" style="animation-delay: -1s"/>
+  <path class="rainbow-arc" d="M-100,440 Q400,140 900,440" style="animation-delay: -2s"/>
+  <path class="rainbow-arc" d="M-100,460 Q400,160 900,460" style="animation-delay: -3s"/>
+  <path class="rainbow-arc" d="M-100,480 Q400,180 900,480" style="animation-delay: -4s"/>
+</svg>
+
+<div class="poop">
+  <svg width="300" height="300" viewBox="0 0 200 200">
+    <!-- Unicorn Ears -->
+    <path class="rainbow" d="M70,65 Q55,35 85,60" stroke="none"/>
+    <path class="rainbow" d="M130,65 Q145,35 115,60" stroke="none"/>
+    
+    <!-- Unicorn Horn -->
+    <path class="unicorn-horn" d="M95,40 Q100,20 105,40" />
+    
+    <!-- Angel Wings -->
+    <g class="wing left-wing">
+      <path class="pan-pink" d="M40,100 C0,50 -40,90 0,130 C20,150 40,130 40,100 M10,85 C-10,65 -30,75 -20,95 C-10,115 0,105 10,85 M25,70 C5,50 -5,60 0,80 C10,100 15,90 25,70" stroke="none"/>
+      <path class="pan-yellow" d="M45,100 C15,60 -15,90 15,120 C30,135 45,120 45,100 M20,90 C5,75 -10,82 0,100 C10,118 15,110 20,90 M35,80 C20,65 10,72 15,90 C25,108 30,100 35,80" stroke="none"/>
+      <path class="pan-blue" d="M50,100 C30,70 10,90 30,110 C40,120 50,110 50,100 M30,95 C20,85 10,90 15,100 C20,110 25,105 30,95 M40,90 C30,80 25,85 28,95 C32,105 35,100 40,90" stroke="none"/>
+    </g>
+    
+    <g class="wing right-wing">
+      <path class="pan-pink" d="M160,100 C200,50 240,90 200,130 C180,150 160,130 160,100 M190,85 C210,65 230,75 220,95 C210,115 200,105 190,85 M175,70 C195,50 205,60 200,80 C190,100 185,90 175,70" stroke="none"/>
+      <path class="pan-yellow" d="M155,100 C185,60 215,90 185,120 C170,135 155,120 155,100 M180,90 C195,75 210,82 200,100 C190,118 185,110 180,90 M165,80 C180,65 190,72 185,90 C175,108 170,100 165,80" stroke="none"/>
+      <path class="pan-blue" d="M150,100 C170,70 190,90 170,110 C160,120 150,110 150,100 M170,95 C180,85 190,90 185,100 C180,110 175,105 170,95 M160,90 C170,80 175,85 172,95 C168,105 165,100 160,90" stroke="none"/>
+    </g>
+    
+    <!-- Main poop emoji shape -->
+    <path class="rainbow" d="M60,100 Q60,60 100,60 Q140,60 140,100 Q140,140 100,140 Q60,140 60,100"/>
+    
+    <!-- Eyes -->
+    <path d="M75,90 Q80,85 85,90" stroke="#000" stroke-width="3" fill="none"/>
+    <path d="M115,90 Q120,85 125,90" stroke="#000" stroke-width="3" fill="none"/>
+    
+    <!-- Blush -->
+    <circle cx="75" cy="105" r="5" fill="#ff9999" opacity="0.5"/>
+    <circle cx="125" cy="105" r="5" fill="#ff9999" opacity="0.5"/>
+    
+    <!-- :P Face -->
+    <path d="M90,110 C95,110 100,115 105,110" stroke="#000" stroke-width="3" fill="none"/>
+    <path class="tongue" d="M98,110 Q100,115 102,110" fill="#ff9999" stroke="#000" stroke-width="1"/>
+  </svg>
+</div>
+
+<div class="friend">
+  <svg width="150" height="150" viewBox="0 0 200 200">
+    <!-- Unicorn horn -->
+    <path class="sunshine-horn" d="M95,40 Q100,20 105,40" />
+    
+    <!-- Mane -->
+    <g class="sunshine-mane">
+      <path d="M60,80 Q80,70 70,90" fill="#FFB6C1" />
+      <path d="M65,75 Q85,65 75,85" fill="#87CEEB" />
+      <path d="M70,70 Q90,60 80,80" fill="#98FB98" />
+      <path d="M75,65 Q95,55 85,75" fill="#DDA0DD" />
+    </g>
+    
+    <!-- Friend shape -->
+    <circle cx="100" cy="100" r="40" fill="white"/>
+    
+    <!-- Unicorn ears -->
+    <path d="M70,65 Q55,35 85,60" fill="white"/>
+    <path d="M130,65 Q145,35 115,60" fill="white"/>
+    
+    <!-- Friend face -->
+    <circle cx="85" cy="90" r="5" fill="black"/>
+    <circle cx="115" cy="90" r="5" fill="black"/>
+    <path d="M90,110 Q100,120 110,110" stroke="black" stroke-width="3" fill="none"/>
+    
+    <!-- Friend blush -->
+    <circle cx="75" cy="100" r="5" fill="#ff9999" opacity="0.5"/>
+    <circle cx="125" cy="100" r="5" fill="#ff9999" opacity="0.5"/>
+    
+    <!-- Name tag -->
+    <text class="name-tag" x="100" y="160">Sunshine</text>
+  </svg>
+</div>
+
+<div class="status-bar">
+  <div class="stat">
+    <div>Poopoo:</div>
+    <div>Happiness: <div class="stat-value"><div class="stat-fill happiness-fill poopoo-happiness-fill" style="width: 100%"></div></div></div>
+    <div>Hunger: <div class="stat-value"><div class="stat-fill hunger-fill poopoo-hunger-fill" style="width: 100%"></div></div></div>
+    <div>Energy: <div class="stat-value"><div class="stat-fill energy-fill poopoo-energy-fill" style="width: 100%"></div></div></div>
+  </div>
+  <div class="stat">
+    <div>Sunshine:</div>
+    <div>Happiness: <div class="stat-value"><div class="stat-fill happiness-fill sunshine-happiness-fill" style="width: 100%"></div></div></div>
+    <div>Hunger: <div class="stat-value"><div class="stat-fill hunger-fill sunshine-hunger-fill" style="width: 100%"></div></div></div>
+    <div>Energy: <div class="stat-value"><div class="stat-fill energy-fill sunshine-energy-fill" style="width: 100%"></div></div></div>
+  </div>
+</div>
+
+<div class="action-buttons">
+  <button class="action-btn" onclick="feed('poopoo')">Feed Poopoo 🍪</button>
+  <button class="action-btn" onclick="play('poopoo')">Play with Poopoo 🎾</button>
+  <button class="action-btn" onclick="sleep('poopoo')">Let Poopoo Sleep 😴</button>
+  <button class="action-btn" onclick="feed('sunshine')">Feed Sunshine 🍪</button>
+  <button class="action-btn" onclick="play('sunshine')">Play with Sunshine 🎾</button>
+  <button class="action-btn" onclick="sleep('sunshine')">Let Sunshine Sleep 😴</button>
+</div>
+
+</body></html>
