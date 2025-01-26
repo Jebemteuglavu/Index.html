@@ -1,0 +1,888 @@
+<style>
+@font-face {
+    font-family: 'PublicPixel';
+    src: url('/PublicPixel.ttf') format('truetype');
+}
+
+body {
+    background: #111; 
+    margin: 0; 
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+}
+
+#game-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: calc(100vh * 16 / 9);
+    max-height: calc(100vw * 9 / 16);
+    aspect-ratio: 16/9;
+}
+
+#arena {
+    position: absolute;
+    width: 960px;
+    height: 540px;
+    opacity: 0;
+    transition: opacity 0.5s;
+    transform-origin: top left;
+    background-image: url(/bg.png);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#win-screen {
+    position: absolute;
+    width: 960px;
+    height: 540px;
+    opacity: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: opacity 0.5s;
+    z-index: 10;
+    transform-origin: center;
+}
+
+#loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #111;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    z-index: 1000;
+    background-image: url('/loading.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.loading-spinner {
+    display: none;
+}
+
+.speech-bubble {
+    position: absolute;
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+    font-family: 'PublicPixel', cursive;
+    font-size: 12px;
+    max-width: 200px;
+    top: 0px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.speech-bubble:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border: 10px solid transparent;
+    border-top-color: white;
+    border-bottom: 0;
+    margin-left: -10px;
+    margin-bottom: -10px;
+}
+
+.floating-text {
+    position: absolute;
+    color: white;
+    font-family: 'PublicPixel', cursive;
+    font-size: 18px;
+    pointer-events: none;
+    z-index: 4;
+    animation: float-up 2s forwards;
+    text-shadow: 2px 2px 2px rgba(0,0,0,0.5);
+}
+
+.floating-text.insult {
+    color: #ff4444;
+}
+
+.floating-text.combo {
+    color: white;
+}
+
+.effect-text {
+    position: absolute;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: purple;
+    font-family: 'PublicPixel', cursive;
+    font-size: 18px;
+    text-shadow: 2px 2px 2px rgba(0,0,0,0.5);
+    animation: float-up 2s forwards;
+    z-index: 10000;
+    width: 80%;
+    text-align: center;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes float-up {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+}
+
+@keyframes crackerShake {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(var(--shake-angle)); }
+}
+
+.rat {
+    position: absolute; 
+    width: 360px; 
+    height: 360px;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    transition: background-image 0.15s ease-in-out;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    transform: translate(0, -50%);
+    z-index: 2;
+}
+
+.cracker {
+    position: absolute; 
+    width: 360px; 
+    height: 360px; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%);
+    background-size: contain;
+    background-repeat: no-repeat;
+    transition: left 0.1s ease-in-out;
+    will-change: left;
+    image-rendering: pixelated;
+    z-index: 1;
+}
+
+.force-bar {
+    position: absolute; 
+    bottom: 20px; 
+    height: 20px; 
+    width: 200px; 
+    border: 2px solid white;
+}
+
+.rat1-bar { left: 20px; }
+.rat2-bar { right: 20px; }
+
+.bar-fill {
+    height: 100%; 
+    background: #B2B5DA !important; 
+    width: 0%; 
+    transition: width 0.3s;
+}
+
+.stats {
+    position: absolute;
+    top: 20px;
+    color: white;
+    font-family: 'PublicPixel', sans-serif;
+    background: rgba(0, 0, 0, 1);
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(122, 146, 190, 0.5),
+                inset 0 0 5px rgba(122, 146, 190, 0.5);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.rat1-stats {
+    left: 20px;
+    transform: skew(-10deg);
+}
+
+.rat2-stats {
+    right: 20px;
+    transform: skew(10deg);
+    text-align: right;
+}
+
+.score-label {
+    font-size: 10px;
+    opacity: 0.8;
+    display: block;
+    margin-bottom: 2px;
+    font-family: 'PublicPixel', sans-serif;
+}
+
+.timer {
+    position: absolute; 
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-family: 'PublicPixel', sans-serif;
+    background: rgba(0, 0, 0, 1);
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(122, 146, 190, 0.5),
+                inset 0 0 5px rgba(122, 146, 190, 0.5);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.time-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.time-box {
+    text-align: center;
+}
+
+.time-label {
+    font-size: 10px;
+    opacity: 0.8;
+    display: block;
+    margin-bottom: 2px;
+    font-family: 'PublicPixel', sans-serif;
+}
+
+.time-value {
+    font-size: 18px;
+    font-family: 'PublicPixel', sans-serif;
+}
+
+.roulette-container-canvas {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 20px;
+    background: rgba(0,0,0,0.7);
+    border: 2px solid white;
+    display: none;
+}
+
+.roulette-fill-canvas {
+    height: 100%;
+    width: 100%;
+    background: #B2B5DA !important;
+    animation: fillBar 1s linear infinite;
+}
+
+#loading-bar-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background: rgba(0,0,0,0.5);
+    z-index: 2001;
+    display: block;
+}
+
+#loading-bar {
+    width: 0%;
+    height: 100%;
+    background: #B2B5DA !important; 
+    transition: width 0.3s;
+}
+
+#loading-progress {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    color: white;
+    font-family: 'PublicPixel', sans-serif;
+    font-size: 12px;
+    line-height: 20px;
+}
+
+@keyframes fillBar {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  #virtual-space {
+    display: block !important;
+  }
+}
+
+.press-space-instructions {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-family: 'PublicPixel', sans-serif;
+    font-size: 12px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    user-select: none;
+    display: none;
+}
+</style>
+</head>
+<body>
+<div id="loading"></div>
+<div id="loading-bar-container">
+    <div id="loading-bar"></div>
+    <div id="loading-progress">Loading: 0%</div>
+</div>
+<div id="cutscene-container" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 3000;">
+  <video id="cutscene" style="width: 100%; height: 100%; object-fit: contain;">
+    <source src="/cutscene.mp4" type="video/mp4">
+  </video>
+  <button id="skip-cutscene" style="position: absolute; bottom: 20px; right: 20px; padding: 10px 20px; background: purple; color: white; border: none; border-radius: 5px; cursor: pointer; font-family: 'PublicPixel', sans-serif;">
+    Skip Cutscene
+  </button>
+</div>
+<div id="game-container">
+    <div id="arena">
+        <div id="win-screen"></div>
+        <div class="stats rat1-stats">
+            <span class="score-label">SCORE</span>
+            <span id="score1">0</span>
+        </div>
+        <div class="timer">
+            <div class="time-container">
+                <div class="time-box">
+                    <span class="time-label">ROUND TIME</span>
+                    <span id="current-time" class="time-value">0:00</span>
+                </div>
+                <div class="time-box">
+                    <span class="time-label">LONGEST ROUND</span>
+                    <span id="best-time" class="time-value">0:00</span>
+                </div>
+            </div>
+        </div>
+        <div class="stats rat2-stats">
+            <span class="score-label">SCORE</span>
+            <span id="score2">0</span>
+        </div>
+        <div id="cracker" class="cracker"></div>
+        <div id="rat1" class="rat">
+            <div class="speech-bubble" id="speech1"></div>
+        </div>
+        <div id="rat2" class="rat">
+            <div class="speech-bubble" id="speech2"></div>
+        </div>
+        <div class="force-bar rat1-bar"><div class="bar-fill" id="bar1"></div></div>
+        <div class="force-bar rat2-bar"><div class="bar-fill" id="bar2"></div></div>
+        <div class="press-space-instructions" id="press-space-instructions" style="display:none;">PRESS SPACE TO GET A RANDOM EVENT!</div>
+    </div>
+</div>
+<button id="start-button" style="position: fixed; bottom: 5%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; padding: 20px 40px; font-size: 24px; background: purple; color: white; border: none; border-radius: 10px; cursor: pointer; font-family: 'PublicPixel', sans-serif;">Click to Start Game</button>
+<button id="virtual-space" style="position: fixed; bottom: 20%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; padding: 15px 30px; font-size: 20px; background: rgba(122, 146, 190, 0.2); color: white; border: 2px solid rgba(122, 146, 190, 0.5); border-radius: 10px; cursor: pointer; display: none; font-family: 'PublicPixel', sans-serif;">SPACE</button>
+
+<script>
+class SeededRNG {
+  constructor(seed) {
+    this.seed = seed % 2147483647;
+    if (this.seed <= 0) this.seed += 2147483646;
+  }
+  next() {
+    return this.seed = this.seed * 16807 % 2147483647;
+  }
+  nextFloat() {
+    return (this.next() - 1) / 2147483646;
+  }
+}
+const bgMusic = new Audio('/musc.mp3');
+bgMusic.loop = true;
+const winSound = new Audio('/win.wav');
+const images = {
+  rat1: {
+    'force-3': '/rat1force-3.png',
+    'force-2': '/rat1force-2.png',
+    'force-1': '/rat1force-1.png',
+    'force0': '/rat1force0.png',
+    'force+1': '/rat1force+1.png',
+    'force+2': '/rat1force+2.png',
+    'force+3': '/rat1force+3.png',
+    'win': '/rat1wins.png'
+  },
+  rat2: {
+    'force-3': '/rat2force-3.png',
+    'force-2': '/rat2force-2.png',
+    'force-1': '/rat2force-1.png',
+    'force0': '/rat2force0.png',
+    'force+1': '/rat2force+1.png',
+    'force+2': '/rat2force+2.png',
+    'force+3': '/rat2force+3.png',
+    'win': '/rat2win.png'
+  }
+};
+const insults = {
+  soft: ["Your whiskers couldn't cut butter, pal.", "You rummage trash cans with the best of them.", "I bet you groom your tail with a toothbrush.", "Is that a tail or a spaghetti noodle?", "You squeak like a door hinge in need of oil.", "Better watch out, or you'll end up in a lab cage.", "You couldn’t nibble your way out of a cheese wrapper.", "You’d lose a race to a potato bug.", "Your best friend is the block of stale cheddar.", "I’ve seen fleas with more hustle than you.", "You're about as scary as a plush toy store.", "Ever consider a day job as a house pet?", "No wonder the cats ignore you.", "Your tail’s so limp, it’s practically a worm.", "You might scare toddlers, but only if they see you from behind."],
+  harsh: ["Get lost, tail-dragger!", "You’d star in a horror flick called ‘Night of the Lame Rat!’", "Mess with me and end up as the cat’s appetizer!", "I’ve seen dumpster divers with more class than you.", "Your mommy must still feed you cheese puffs at night.", "You squeak like you’re auditioning for a discount monster movie.", "That patchy fur screams 'I lost a bet with a barber!'", "You’ll never outrun your own stench!", "Prepare to get stomped into rodent jelly!", "I’d alpha-roll you, but you’re not worth the effort.", "If brains were cheese, you’d have moldy crumbs.", "Your squeak is best used as a doorstop alarm.", "Face it, you belong in a pest control ad.", "I’d say you’re a has-been, but you never were anything!", "The only thing smaller than your bite is your dignity!"]
+};
+const ROULETTE_EFFECTS = ['rat1Boost', 'rat2Boost', 'neutralize', 'aggressive', 'inverse'];
+const PROGRESS_MULTIPLIER = 0.3;
+class RatGame {
+  constructor() {
+    this.seed = 1736380524349;
+    this.rng = new SeededRNG(this.seed);
+    console.log('Initial seed set to:', this.seed);
+    this.rat1Force = 0;
+    this.rat2Force = 0;
+    this.rat1Progress = 50;
+    this.rat2Progress = 50;
+    this.crackerPos = 50;
+    this.loadedImages = 0;
+    this.totalImages = Object.keys(images.rat1).length + Object.keys(images.rat2).length + 1;
+    this.currentRat1Sprite = 'force0';
+    this.currentRat2Sprite = 'force0';
+    this.gameActive = true;
+    this.insultTimeout = null;
+    this.weakenedRat = null;
+    this.weakenTimeout = null;
+    this.rat1El = document.getElementById('rat1');
+    this.rat2El = document.getElementById('rat2');
+    this.crackerEl = document.getElementById('cracker');
+    this.bar1El = document.getElementById('bar1');
+    this.bar2El = document.getElementById('bar2');
+    this.arenaEl = document.getElementById('arena');
+    this.loadingEl = document.getElementById('loading');
+    this.winScreenEl = document.getElementById('win-screen');
+    this.speech1El = document.getElementById('speech1');
+    this.speech2El = document.getElementById('speech2');
+    this.messages = {
+      weakened: ["WEAKENED!", "POWER DOWN!", "OUCH!", "THAT HURT!"],
+      combo: ["COMBO!", "DOUBLE HIT!", "CRITICAL!", "SUPER PULL!"]
+    };
+    this.lastComboTime = 0;
+    this.comboTimeout = null;
+    this.bgMusic = bgMusic;
+    this.winSound = winSound;
+    this.startButton = document.getElementById('start-button');
+    this.currentRoundTime = 0;
+    this.bestRoundTime = 0;
+    this.rat1Score = 0;
+    this.rat2Score = 0;
+    this.currentTimeEl = document.getElementById('current-time');
+    this.bestTimeEl = document.getElementById('best-time');
+    this.score1El = document.getElementById('score1');
+    this.score2El = document.getElementById('score2');
+    this.globalAggressiveness = 1;
+    this.rouletteActive = false;
+    this.rouletteTimer = null;
+    this.rouletteContainerEl = document.createElement('div');
+    this.rouletteContainerEl.className = 'roulette-container-canvas';
+    this.arenaEl.appendChild(this.rouletteContainerEl);
+    this.rouletteFillEl = document.createElement('div');
+    this.rouletteFillEl.className = 'roulette-fill-canvas';
+    this.rouletteContainerEl.appendChild(this.rouletteFillEl);
+    this.rouletteEnabled = true;
+    this.loadingBar = document.getElementById('loading-bar');
+    this.loadingProgress = document.getElementById('loading-progress');
+    this.cutsceneContainer = document.getElementById('cutscene-container');
+    this.cutscene = document.getElementById('cutscene');
+    this.skipCutsceneBtn = document.getElementById('skip-cutscene');
+    this.preloadedSprites = {
+      rat1: {},
+      rat2: {}
+    };
+    this.gameOver = false;
+    this.virtualSpaceBtn = document.getElementById('virtual-space');
+    this.pressSpaceInstructionsEl = document.getElementById('press-space-instructions');
+    for (const rat in images) {
+      for (const sprite in images[rat]) {
+        this.preloadedSprites[rat][sprite] = new Image();
+        this.preloadedSprites[rat][sprite].src = images[rat][sprite];
+        this.preloadedSprites[rat][sprite].style.display = 'none';
+        document.body.appendChild(this.preloadedSprites[rat][sprite]);
+      }
+    }
+    this.startButton.addEventListener('click', () => {
+      this.startButton.style.display = 'none';
+      this.loadingEl.style.display = 'flex';
+      this.preloadImages();
+    });
+    this.skipCutsceneBtn.addEventListener('click', () => {
+      this.endCutscene();
+    });
+    this.cutscene.addEventListener('ended', () => {
+      this.endCutscene();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space' && this.rouletteActive && this.gameActive) {
+        this.triggerRoulette();
+      }
+    });
+    this.virtualSpaceBtn.addEventListener('click', () => {
+      if (this.rouletteActive && this.gameActive) {
+        this.triggerRoulette();
+      }
+    });
+  }
+  scheduleRoulette() {
+    const delay = 5000 + this.rng.nextFloat() * 7000;
+    this.rouletteTimer = setTimeout(() => {
+      if (!this.gameActive || !this.rouletteEnabled) return;
+      this.showRoulette();
+    }, delay);
+  }
+  showRoulette() {
+    this.rouletteActive = true;
+    this.rouletteContainerEl.style.display = 'flex';
+    this.pressSpaceInstructionsEl.style.display = 'block';
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+      this.virtualSpaceBtn.style.background = 'rgba(122, 146, 190, 0.4)';
+      this.virtualSpaceBtn.style.border = '2px solid rgba(122, 146, 190, 0.8)';
+    }
+  }
+  hideRoulette() {
+    this.rouletteActive = false;
+    this.rouletteContainerEl.style.display = 'none';
+    this.pressSpaceInstructionsEl.style.display = 'none';
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+      this.virtualSpaceBtn.style.background = 'rgba(122, 146, 190, 0.2)';
+      this.virtualSpaceBtn.style.border = '2px solid rgba(122, 146, 190, 0.5)';
+    }
+  }
+  triggerRoulette() {
+    if (!this.rouletteEnabled) return;
+    const effect = ROULETTE_EFFECTS[Math.floor(this.rng.nextFloat() * ROULETTE_EFFECTS.length)];
+    let effectText = '';
+    if (effect === 'rat1Boost') {
+      this.rat1Force += 1;
+      effectText = "Rat 1 Power Boost!";
+    } else if (effect === 'rat2Boost') {
+      this.rat2Force += 1;
+      effectText = "Rat 2 Power Boost!";
+    } else if (effect === 'neutralize') {
+      this.rat1Force = 0;
+      this.rat2Force = 0;
+      this.rat1Progress = 50;
+      this.rat2Progress = 50;
+      this.crackerPos = 50;
+      effectText = "Forces Neutralized!";
+    } else if (effect === 'aggressive') {
+      this.globalAggressiveness = 2;
+      setTimeout(() => {
+        this.globalAggressiveness = 1;
+      }, 3000);
+      effectText = "Aggression Increased!";
+    } else if (effect === 'inverse') {
+      const tempForce = this.rat1Force;
+      this.rat1Force = -this.rat2Force;
+      this.rat2Force = -tempForce;
+      const tempProgress = this.rat1Progress;
+      this.rat1Progress = this.rat2Progress;
+      this.rat2Progress = tempProgress;
+      effectText = "Forces Reversed!";
+    }
+    const effectEl = document.createElement('div');
+    effectEl.className = 'effect-text';
+    effectEl.textContent = effectText;
+    this.arenaEl.appendChild(effectEl);
+    const container = document.getElementById('game-container');
+    const containerWidth = container.offsetWidth;
+    const containerHeight = container.offsetHeight;
+    const scale = Math.min(containerWidth / 960, containerHeight / 540);
+    effectEl.style.transform = `translateX(-50%) scale(${scale})`;
+    setTimeout(() => this.arenaEl.removeChild(effectEl), 2000);
+    this.hideRoulette();
+    this.rouletteEnabled = false;
+    setTimeout(() => {
+      this.rouletteEnabled = true;
+      this.scheduleRoulette();
+    }, 5000 + this.rng.nextFloat() * 7000);
+  }
+  scheduleNextInsult() {
+    const delay = 3000 + this.rng.nextFloat() * 5000;
+    clearTimeout(this.insultTimeout);
+    this.insultTimeout = setTimeout(() => {
+      this.throwInsult();
+      this.scheduleNextInsult();
+    }, delay);
+  }
+  throwInsult() {
+    if (!this.gameActive) return;
+    const insulter = this.rng.nextFloat() < 0.5 ? 'rat1' : 'rat2';
+    const isHarsh = this.rng.nextFloat() < 0.3;
+    const insultList = isHarsh ? insults.harsh : insults.soft;
+    const insult = insultList[Math.floor(this.rng.nextFloat() * insultList.length)];
+    const speechEl = insulter === 'rat1' ? this.speech1El : this.speech2El;
+    speechEl.textContent = insult;
+    speechEl.style.opacity = '1';
+    if (isHarsh) {
+      this.weakenedRat = insulter === 'rat1' ? 'rat2' : 'rat1';
+      clearTimeout(this.weakenTimeout);
+      this.weakenTimeout = setTimeout(() => {
+        this.weakenedRat = null;
+      }, 2000);
+      const msgEl = document.createElement('div');
+      msgEl.className = 'floating-text insult';
+      msgEl.textContent = this.messages.weakened[Math.floor(this.rng.nextFloat() * this.messages.weakened.length)];
+      msgEl.style.left = `${this.weakenedRat === 'rat1' ? 25 : 75}%`;
+      msgEl.style.top = '50%';
+      this.arenaEl.appendChild(msgEl);
+      setTimeout(() => this.arenaEl.removeChild(msgEl), 2000);
+    }
+    setTimeout(() => {
+      speechEl.style.opacity = '0';
+    }, 2000);
+  }
+  updateForces() {
+    if (!this.gameActive) return;
+    this.rat1Force += (this.rng.nextFloat() - 0.5) * 0.3 * this.globalAggressiveness;
+    this.rat2Force += (this.rng.nextFloat() - 0.5) * 0.3 * this.globalAggressiveness;
+    if (this.weakenedRat === 'rat1') {
+      this.rat1Force *= 0.7;
+    } else if (this.weakenedRat === 'rat2') {
+      this.rat2Force *= 0.7;
+    }
+    this.rat1Force *= 0.98;
+    this.rat2Force *= 0.98;
+    const forceDiff = this.rat1Force - this.rat2Force;
+    if (forceDiff > 0) {
+      this.rat1Progress = Math.min(100, this.rat1Progress + forceDiff * PROGRESS_MULTIPLIER);
+      this.rat2Progress = Math.max(0, this.rat2Progress - forceDiff * PROGRESS_MULTIPLIER);
+      this.crackerPos = 50 - (this.rat1Progress - 50) * 0.4;
+    } else {
+      this.rat2Progress = Math.min(100, this.rat2Progress - forceDiff * PROGRESS_MULTIPLIER);
+      this.rat1Progress = Math.max(0, this.rat1Progress + forceDiff * PROGRESS_MULTIPLIER);
+      this.crackerPos = 50 + (this.rat2Progress - 50) * 0.4;
+    }
+    this.crackerPos = Math.max(30, Math.min(70, this.crackerPos));
+    if (Math.abs(forceDiff) > 0.5) {
+      const now = Date.now();
+      if (now - this.lastComboTime > 3000) {
+        this.lastComboTime = now;
+        const msgEl = document.createElement('div');
+        msgEl.className = 'floating-text combo';
+        msgEl.textContent = this.messages.combo[Math.floor(this.rng.nextFloat() * this.messages.combo.length)];
+        msgEl.style.left = `${forceDiff > 0 ? 25 : 75}%`;
+        msgEl.style.top = '50%';
+        this.arenaEl.appendChild(msgEl);
+        setTimeout(() => this.arenaEl.removeChild(msgEl), 2000);
+      }
+    }
+  }
+  setupResizeHandler() {
+    const resizeCanvas = () => {
+      const container = document.getElementById('game-container');
+      const containerWidth = container.offsetWidth;
+      const containerHeight = container.offsetHeight;
+      const scale = Math.min(containerWidth / 960, containerHeight / 540);
+      this.arenaEl.style.transform = `scale(${scale})`;
+      const effectEl = document.querySelector('.effect-text');
+      if (effectEl) {
+        effectEl.style.transform = `translateX(-50%) scale(${scale})`;
+      }
+      document.getElementById('loading-bar-container').style.bottom = '0';
+    };
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+  }
+  showWinScreen(winner) {
+    try {
+      this.winSound.play().catch(console.error);
+    } catch (e) {
+      console.error('Audio playback failed:', e);
+    }
+    if (!this.gameOver) {
+      if (this.currentRoundTime > this.bestRoundTime) {
+        this.bestRoundTime = this.currentRoundTime;
+        this.bestTimeEl.textContent = this.formatTime(this.bestRoundTime);
+      }
+      if (winner === 'rat1') {
+        this.rat1Score++;
+        this.score1El.textContent = this.rat1Score;
+      } else {
+        this.rat2Score++;
+        this.score2El.textContent = this.rat2Score;
+      }
+    }
+    this.gameActive = false;
+    this.gameOver = true;
+    this.globalAggressiveness = 1;
+    clearTimeout(this.insultTimeout);
+    clearTimeout(this.rouletteTimer);
+    this.hideRoulette();
+    this.speech1El.style.opacity = '0';
+    this.speech2El.style.opacity = '0';
+    this.winScreenEl.style.backgroundImage = `url(${images[winner].win})`;
+    this.winScreenEl.style.opacity = '1';
+    setTimeout(() => {
+      this.winScreenEl.style.opacity = '0';
+      setTimeout(() => {
+        this.resetGame();
+        this.gameActive = true;
+        this.gameOver = false;
+        this.scheduleNextInsult();
+        this.scheduleRoulette();
+      }, 500);
+    }, 1500);
+  }
+  preloadImages() {
+    const preloadImage = src => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          this.loadedImages++;
+          const progress = Math.round(this.loadedImages / this.totalImages * 100);
+          this.loadingBar.style.width = `${progress}%`;
+          this.loadingProgress.textContent = `Loading: ${progress}%`;
+          resolve();
+        };
+        img.onerror = reject;
+        img.src = src;
+        img.style.display = 'none';
+        document.body.appendChild(img);
+      });
+    };
+    const preloadAudio = src => {
+      return new Promise((resolve, reject) => {
+        const audio = new Audio();
+        audio.addEventListener('canplaythrough', () => {
+          resolve();
+        }, {
+          once: true
+        });
+        audio.addEventListener('error', reject, {
+          once: true
+        });
+        audio.src = src;
+      });
+    };
+    const imagesToLoad = [...Object.values(images.rat1), ...Object.values(images.rat2), '/cracker.png', '/bg.png'];
+    const audioToLoad = ['/musc.mp3', '/win.wav'];
+    Promise.all([...imagesToLoad.map(src => preloadImage(src)), ...audioToLoad.map(src => preloadAudio(src))]).then(() => {
+      this.loadingEl.style.display = 'none';
+      document.getElementById('loading-bar-container').style.display = 'none';
+      this.startCutscene();
+    }).catch(error => {
+      console.error('Failed to load assets:', error);
+      this.loadingEl.textContent = 'Failed to load game assets. Please refresh.';
+      this.loadingProgress.textContent = 'Loading failed';
+      this.loadingBar.style.background = 'red';
+    });
+  }
+  setupImages() {
+    this.rat1El.style.backgroundImage = `url(${images.rat1.force0})`;
+    this.rat2El.style.backgroundImage = `url(${images.rat2.force0})`;
+    this.crackerEl.style.backgroundImage = `url(/cracker.png)`;
+    this.rat1El.style.left = '10%';
+    this.rat2El.style.right = '10%';
+    this.rat1El.style.top = '50%';
+    this.rat2El.style.top = '50%';
+  }
+  getForceSprite(force) {
+    const threshold = 0.05;
+    if (force < -0.6 - threshold) return 'force-3';
+    if (force < -0.3 - threshold) return 'force-2';
+    if (force < -0.1 - threshold) return 'force-1';
+    if (force < 0.1 + threshold && force > -0.1 - threshold) return 'force0';
+    if (force < 0.3 + threshold) return 'force+1';
+    if (force < 0.6 + threshold) return 'force+2';
+    return 'force+3';
+  }
+  updateSprites() {
+    const newRat1Sprite = this.getForceSprite(this.rat1Force - this.rat2Force);
+    const newRat2Sprite = this.getForceSprite(this.rat2Force - this.rat1Force);
+    if (this.currentRat1Sprite !== newRat1Sprite) {
+      this.currentRat1Sprite = newRat1Sprite;
+      this.rat1El.style.backgroundImage = `url(${images.rat1[newRat1Sprite]})`;
+    }
+    if (this.currentRat2Sprite !== newRat2Sprite) {
+      this.currentRat2Sprite = newRat2Sprite;
+      this.rat2El.style.backgroundImage = `url(${images.rat2[newRat2Sprite]})`;
+    }
+    this.crackerEl.style.left = `${this.crackerPos}%`;
+    const progressDiff = this.rat1Progress - this.rat2Progress;
+    const shakeAngle = progressDiff * 0.2;
+    this.crackerEl.style.setProperty('--shake-angle', `${shakeAngle}deg`);
+    this.crackerEl.style.animation = 'crackerShake 0.5s ease-in-out alternate infinite';
+    this.bar1El.style.width = `${this.rat1Progress}%`;
+    this.bar2El.style.width = `${this.rat2Progress}%`;
+    if (this.gameActive && !this.gameOver && this.rat1Progress >= 100) {
+      this.showWinScreen('rat1');
+    } else if (this.gameActive && !this.gameOver && this.rat2Progress >= 100) {
+      this.showWinScreen('rat2');
+    }
+  }
+  resetGame() {
+    this.rat1Force = 0;
+    this.rat2Force = 0;
+    this.rat1Progress = 50;
+    this.rat2Progress = 50;
+    this.crackerPos = 50;
+    this.weakenedRat = null;
+    this.globalAggressiveness = 1;
+    this.rouletteEnabled = true;
+    this.currentRoundTime = 0;
+    this.currentTimeEl.textContent = this.formatTime(0);
+    this.virtualSpaceBtn.style.background = 'rgba(122, 146, 190, 0.2)';
+    this.virtualSpaceBtn.style.border = '2px solid rgba(122, 146, 190, 0.5)';
+    setTimeout(() => {
+      this.roundStartTime = Date.now();
+    }, 100);
+    this.crackerEl.style.animation = 'none';
+    this.crackerEl.style.transform = 'translate(-50%, -50%) rotate(0deg)';
+    this.seed = Date.now();
+    this.rng = new SeededRNG(this.seed);
+    console.log('Seed changed to:', this.seed);
+  }
+  formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+  gameLoop() {
+    this.updateForces();
+    if (this.gameActive) {
+      this.currentRoundTime = Math.floor((Date.now() - this.roundStartTime) / 1000);
+      this.currentTimeEl.textContent = this.formatTime(this.currentRoundTime);
+    }
+    this.updateSprites();
+    requestAnimationFrame(() => this.gameLoop());
+  }
+  startCutscene() {
+    this.cutsceneContainer.style.display = 'block';
+    this.cutscene.play().catch(console.error);
+  }
+  endCutscene() {
+    this.cutsceneContainer.style.display = 'none';
+    this.cutscene.pause();
+    this.cutscene.currentTime = 0;
+    this.arenaEl.style.opacity = '1';
+    this.setupImages();
+    this.setupResizeHandler();
+    this.roundStartTime = Date.now();
+    this.gameLoop();
+    this.scheduleNextInsult();
+    this.scheduleRoulette();
+    this.bgMusic.play().catch(console.error);
+  }
+}
+new RatGame();
+</script>
+</body>
+</html>
