@@ -1,0 +1,148 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lette & Lingo's Pet Care Adventure</title>
+  <link rel="stylesheet" href="styles.css">
+  <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.159.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.159.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="startScreen" class="screen">
+    <h1>Lette & Lingo's Pet Care Adventure</h1>
+    <button id="startButton">Start Adventure</button>
+    <div class="menu-buttons">
+      <button id="faqButton" class="menu-button">FAQ</button>
+      <button id="settingsButton" class="menu-button">Settings</button>
+      <button id="aboutButton" class="menu-button">About Us</button>
+    </div>
+  </div>
+
+  <!-- FAQ Panel -->
+  <div id="faqPanel" class="info-panel hidden">
+    <div class="panel-content">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <h3>How do I move my character?</h3>
+        <p>Use the joystick in the bottom-left corner to move around the world.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How do I interact with creatures?</h3>
+        <p>Press 'E' when near a creature to interact with them.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How do I use portals?</h3>
+        <p>Approach a portal and press 'E' to teleport to different areas.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How do I play music?</h3>
+        <p>Find the radio and press 'R' to open the music interface.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Who is Doofy?</h3>
+        <p>Doofy is your friendly ghost puppy companion! Press 'W' to chat with him.</p>
+      </div>
+      <button class="close-button">Close</button>
+    </div>
+  </div>
+
+  <!-- Settings Panel -->
+  <div id="settingsPanel" class="info-panel hidden">
+    <div class="panel-content">
+      <h2>Settings</h2>
+      <div class="settings-section">
+        <h3>Graphics</h3>
+        <div class="setting-item">
+          <label for="quality">Quality:</label>
+          <select id="quality">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+      </div>
+      <div class="settings-section">
+        <h3>Audio</h3>
+        <div class="setting-item">
+          <label for="musicVolume">Music Volume:</label>
+          <input type="range" id="musicVolume" min="0" max="100" value="70">
+        </div>
+        <div class="setting-item">
+          <label for="sfxVolume">Sound Effects:</label>
+          <input type="range" id="sfxVolume" min="0" max="100" value="80">
+        </div>
+      </div>
+      <div class="settings-section">
+        <h3>Controls</h3>
+        <div class="setting-item">
+          <label for="sensitivity">Movement Sensitivity:</label>
+          <input type="range" id="sensitivity" min="1" max="100" value="50">
+        </div>
+      </div>
+      <button class="close-button">Close</button>
+    </div>
+  </div>
+
+  <!-- About Us Panel -->
+  <div id="aboutPanel" class="info-panel hidden">
+    <div class="panel-content">
+      <h2>About Us</h2>
+      <div class="about-section">
+        <h3>Our Story</h3>
+        <p>Welcome to Lette & Lingo's Pet Care Adventure! This magical world was created to bring joy and adventure to pet lovers everywhere. Our mission is to create a safe, fun, and educational space where players can learn about pet care while embarking on exciting adventures.</p>
+      </div>
+      <div class="about-section">
+        <h3>The Characters</h3>
+        <div class="character-info">
+          <h4>Lette</h4>
+          <p>A cheerful yellow mouse who loves to make new friends and spread happiness wherever she goes.</p>
+        </div>
+        <div class="character-info">
+          <h4>Lingo</h4>
+          <p>A clever blue mouse who uses his analytical mind to solve problems and help others.</p>
+        </div>
+      </div>
+      <div class="about-section">
+        <h3>Contact Us</h3>
+        <p>Email: hello@letteandlingo.com</p>
+        <p>Follow us on social media @LetteAndLingo</p>
+      </div>
+      <button class="close-button">Close</button>
+    </div>
+  </div>
+
+  <div id="characterSelect" class="screen hidden">
+    <h2>Choose Your Character</h2>
+    <div class="character-options">
+      <div class="character-card" data-character="lette">
+        <div class="character-preview lette"></div>
+        <h3>Lette</h3>
+        <p>The adventurous, cheerful yellow mouse</p>
+      </div>
+      <div class="character-card" data-character="lingo">
+        <div class="character-preview lingo"></div>
+        <h3>Lingo</h3>
+        <p>The clever, analytical blue mouse</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="gameScreen" class="screen hidden">
+    <div id="gameContainer"></div>
+    <div id="joystick"></div>
+    <div class="portal-prompt">
+      Press E to enter the portal
+    </div>
+    <!-- Radio prompt will be added dynamically -->
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
