@@ -1,0 +1,488 @@
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>Pastel Star & Puppy Tower Deluxe</title>
+
+<style>
+  body {
+    font-family: 'Courier New', monospace;
+    background-color: #fff0f5;
+    background-image: radial-gradient(#ffe4e1 10%, transparent 11%),
+                      radial-gradient(#ffe4e1 10%, transparent 11%);
+    background-size: 30px 30px;
+    background-position: 0 0, 15px 15px;
+    background-repeat: repeat;
+    color: #ffb6c1;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  header {
+    background-color: rgba(255, 240, 245, 0.8);
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(255, 182, 193, 0.1);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 2em;
+    color: #ffb6c1;
+    text-shadow: 2px 2px #ffffff;
+  }
+
+  .game-container {
+    background-color: #ffe4e1;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 0 15px rgba(255, 182, 193, 0.3);
+    width: 90%;
+    max-width: 1280px;
+    aspect-ratio: 16 / 9;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .game-window {
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff;
+    border-radius: 5px;
+    position: relative;
+    overflow: hidden;
+    border: 10px solid #ffe4e1;
+    box-sizing: border-box;
+  }
+
+  .star, .puppy {
+    position: absolute;
+    user-select: none;
+    transition: all 0.05s linear;
+  }
+
+  .star-normal {
+    font-size: 24px;
+  }
+
+  .star-big {
+    font-size: 48px;
+  }
+
+  .puppy {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    text-align: center;
+    line-height: 32px;
+    transition: all 0.3s ease;
+  }
+
+  .basket {
+    position: absolute;
+    font-size: 40px;
+    user-select: none;
+    transition: all 0.1s ease;
+  }
+
+  .stats {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 1.2em;
+    background-color: rgba(255, 228, 225, 0.7);
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: #ffb6c1;
+  }
+
+  #muteButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #ffb6c1;
+  }
+
+  #difficultyLevel {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 16px;
+    background-color: rgba(255, 228, 225, 0.7);
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: #ffb6c1;
+  }
+
+  .instructions {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    font-style: italic;
+    background-color: rgba(255, 228, 225, 0.7);
+    padding: 5px 10px;
+    border-radius: 5px;
+    width: 80%;
+    color: #ffb6c1;
+  }
+
+  .lace {
+    position: absolute;
+    width: 100%;
+    height: 20px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='20' viewBox='0 0 100 20'%3E%3Cpath d='M21.184 20c.357-.13.72-.264 1.088-.402l1.768-.661C33.64 15.347 39.647 14 50 14c10.271 0 15.362 1.222 24.629 4.928.955.383 1.869.74 2.75 1.072h6.225c-2.51-.73-5.139-1.691-8.233-2.928C65.888 13.278 60.562 12 50 12c-10.626 0-16.855 1.397-26.66 5.063l-1.767.662c-2.475.923-4.66 1.674-6.724 2.275h6.335zm0-20C13.258 2.892 8.077 4 0 4V2c5.744 0 9.951-.574 14.85-2h6.334zM77.38 0C85.239 2.966 90.502 4 100 4V2c-6.842 0-11.386-.542-16.396-2h-6.225zM0 14c8.44 0 13.718-1.21 22.272-4.402l1.768-.661C33.64 5.347 39.647 4 50 4c10.271 0 15.362 1.222 24.629 4.928C84.112 12.722 89.438 14 100 14v-2c-10.271 0-15.362-1.222-24.629-4.928C65.888 3.278 60.562 2 50 2 39.374 2 33.145 3.397 23.34 7.063l-1.767.662C13.223 10.84 8.163 12 0 12v2z' fill='%23ffe4e1' fill-opacity='0.4'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Pastel Star & Puppy Tower Deluxe 🌟🐶</h1>
+  </header>
+
+  <div class="game-container">
+    <div class="lace" style="top: 0;"></div>
+    <div class="lace" style="bottom: 0; transform: rotate(180deg);"></div>
+    <div id="gameWindow" class="game-window">
+      <!-- Stars, puppies and basket will be dynamically added here -->
+      <button id="muteButton">🔊</button>
+      <div id="difficultyLevel">Difficulty: Normal</div>
+      <div class="stats">
+        <p>Stars Caught: <span id="starCount">0</span></p>
+        <p>Puppies: <span id="puppyCount">0</span></p>
+      </div>
+      <div class="instructions">
+        <p>Use W (Up), S (Down), A (Left), D (Right) to move the basket and catch falling stars!</p>
+        <p>Catch big stars for double points! Every 5 points, a puppy falls from the sky! ⭐⭐🐶</p>
+        <p>Match 3 or more puppies to clear them with a cute bark! 🐶🐶🐶</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let stars = 0;
+    let puppies = 0;
+    const gameWindow = document.getElementById('gameWindow');
+    const basket = document.createElement('div');
+    basket.className = 'basket';
+    basket.textContent = '🧺';
+    basket.style.left = '50%';
+    basket.style.bottom = '10px';
+    gameWindow.appendChild(basket);
+
+    let isMuted = false;
+    const muteButton = document.getElementById('muteButton');
+    muteButton.addEventListener('click', toggleMute);
+
+    let difficulty = 1;
+    const difficultyLevelElement = document.getElementById('difficultyLevel');
+
+    const puppyEmojis = ['🐶', '🐕', '🦮', '🐕‍🦺', '🐩'];
+    const gridColumns = Math.floor(gameWindow.offsetWidth / 32);
+    const gridRows = Math.floor(gameWindow.offsetHeight / 32);
+    const puppyGrid = Array(gridRows).fill().map(() => Array(gridColumns).fill(null));
+
+    // Create audio context
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioContext = new AudioContext();
+
+    // Create cute sound effect
+    function createCuteSound(isBigStar) {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(isBigStar ? 659.25 : 523.25, audioContext.currentTime); // E5 for big star, C5 for normal
+      oscillator.frequency.exponentialRampToValueAtTime(isBigStar ? 1318.51 : 987.77, audioContext.currentTime + 0.1); // E6 for big star, B5 for normal
+      
+      gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.3);
+    }
+
+    // Create cute puppy bark sound effect
+    function createCuteBarkSound() {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.type = 'sawtooth';
+      oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
+      oscillator.frequency.setValueAtTime(300, audioContext.currentTime + 0.1);
+      oscillator.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 0.2);
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.2);
+    }
+
+    function toggleMute() {
+      isMuted = !isMuted;
+      muteButton.textContent = isMuted ? '🔇' : '🔊';
+    }
+
+    function updateDisplay() {
+      document.getElementById('starCount').textContent = stars;
+      document.getElementById('puppyCount').textContent = puppies;
+    }
+
+    function createStar() {
+      const star = document.createElement('div');
+      star.className = 'star';
+      const isBigStar = Math.random() < 0.2; // 20% chance for a big star
+      star.classList.add(isBigStar ? 'star-big' : 'star-normal');
+      star.textContent = '⭐';
+      star.style.left = `${Math.random() * (gameWindow.offsetWidth - (isBigStar ? 48 : 24))}px`;
+      star.style.top = '0px';
+      gameWindow.appendChild(star);
+
+      let position = 0;
+      const fallSpeed = (isBigStar ? 2 : 3) * difficulty; // Increase fall speed based on difficulty
+      const fallInterval = setInterval(() => {
+        position += fallSpeed;
+        star.style.top = `${position}px`;
+
+        if (position >= gameWindow.offsetHeight - (isBigStar ? 48 : 24)) {
+          clearInterval(fallInterval);
+          star.remove();
+        }
+
+        if (isCollision(star, basket)) {
+          clearInterval(fallInterval);
+          star.remove();
+          const points = isBigStar ? 2 : 1;
+          stars += points;
+          updateDisplay();
+          if (!isMuted) {
+            createCuteSound(isBigStar);
+          }
+          increaseDifficulty();
+          if (stars % 5 === 0) {
+            createPuppy();
+          }
+        }
+      }, 20); // Decreased interval for smoother animation
+    }
+
+    function createPuppy() {
+      const puppy = document.createElement('div');
+      puppy.className = 'puppy';
+      const puppyEmoji = puppyEmojis[Math.floor(Math.random() * puppyEmojis.length)];
+      puppy.textContent = puppyEmoji;
+      puppy.dataset.emoji = puppyEmoji;
+      
+      let column = Math.floor(Math.random() * gridColumns);
+      puppy.style.left = `${column * 32}px`;
+      puppy.style.top = '0px';
+      gameWindow.appendChild(puppy);
+
+      let position = 0;
+      const fallSpeed = 2 * difficulty; // Adjust puppy fall speed
+      const fallInterval = setInterval(() => {
+        position += fallSpeed;
+        puppy.style.top = `${position}px`;
+
+        const row = Math.floor(position / 32);
+        if (row >= gridRows || (row > 0 && puppyGrid[row - 1][column])) {
+          clearInterval(fallInterval);
+          let finalRow = row >= gridRows ? gridRows - 1 : row - 1;
+          
+          // Find the first empty spot from the bottom
+          while (finalRow > 0 && puppyGrid[finalRow][column]) {
+            finalRow--;
+          }
+          
+          if (finalRow >= 0) {
+            puppy.style.top = `${finalRow * 32}px`;
+            puppyGrid[finalRow][column] = puppy;
+            puppies++;
+            updateDisplay();
+            checkForMatches();
+          } else {
+            // If the column is full, remove the puppy
+            puppy.remove();
+          }
+        }
+      }, 20);
+    }
+
+    function checkForMatches() {
+      for (let row = 0; row < gridRows; row++) {
+        for (let col = 0; col < gridColumns; col++) {
+          if (puppyGrid[row][col]) {
+            const matches = findMatches(row, col);
+            if (matches.length >= 3) {
+              clearMatches(matches);
+              if (!isMuted) {
+                createCuteBarkSound();
+              }
+              return true; // Return true if a match was found and cleared
+            }
+          }
+        }
+      }
+      return false; // Return false if no matches were found
+    }
+
+    function findMatches(row, col) {
+      const emoji = puppyGrid[row][col].dataset.emoji;
+      const matches = [[row, col]];
+      const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]]; // right, down, left, up
+
+      for (const [dx, dy] of directions) {
+        let newRow = row + dx;
+        let newCol = col + dy;
+        while (
+          newRow >= 0 && newRow < gridRows &&
+          newCol >= 0 && newCol < gridColumns &&
+          puppyGrid[newRow][newCol] &&
+          puppyGrid[newRow][newCol].dataset.emoji === emoji
+        ) {
+          matches.push([newRow, newCol]);
+          newRow += dx;
+          newCol += dy;
+        }
+      }
+
+      return matches;
+    }
+
+    function clearMatches(matches) {
+      for (const [row, col] of matches) {
+        puppyGrid[row][col].style.transform = 'scale(0)';
+        setTimeout(() => {
+          puppyGrid[row][col].remove();
+          puppyGrid[row][col] = null;
+        }, 300);
+        puppies--;
+      }
+      updateDisplay();
+      setTimeout(dropPuppies, 300);
+    }
+
+    function dropPuppies() {
+      for (let col = 0; col < gridColumns; col++) {
+        let emptySpaces = 0;
+        for (let row = gridRows - 1; row >= 0; row--) {
+          if (!puppyGrid[row][col]) {
+            emptySpaces++;
+          } else if (emptySpaces > 0) {
+            const puppy = puppyGrid[row][col];
+            puppyGrid[row + emptySpaces][col] = puppy;
+            puppyGrid[row][col] = null;
+            puppy.style.top = `${(row + emptySpaces) * 32}px`;
+          }
+        }
+      }
+      setTimeout(checkForMatches, 300);
+    }
+
+    function isCollision(element, basket) {
+      const elementRect = element.getBoundingClientRect();
+      const basketRect = basket.getBoundingClientRect();
+
+      return !(
+        elementRect.bottom < basketRect.top ||
+        elementRect.top > basketRect.bottom ||
+        elementRect.right < basketRect.left ||
+        elementRect.left > basketRect.right
+      );
+    }
+
+    let basketPosition = { x: gameWindow.offsetWidth / 2, y: 10 };
+    let basketVelocity = { x: 0, y: 0 };
+    const acceleration = 0.5;
+    const maxSpeed = 10;
+    const friction = 0.9;
+
+    function updateBasketPosition() {
+      basketPosition.x += basketVelocity.x;
+      basketPosition.y += basketVelocity.y;
+
+      // Apply boundaries
+      basketPosition.x = Math.max(0, Math.min(basketPosition.x, gameWindow.offsetWidth - 40));
+      basketPosition.y = Math.max(10, Math.min(basketPosition.y, gameWindow.offsetHeight - 40));
+
+      // Apply friction
+      basketVelocity.x *= friction;
+      basketVelocity.y *= friction;
+
+      // Update basket position
+      basket.style.left = `${basketPosition.x}px`;
+      basket.style.bottom = `${basketPosition.y}px`;
+
+      requestAnimationFrame(updateBasketPosition);
+    }
+
+    updateBasketPosition();
+
+    const keysPressed = {};
+
+    document.addEventListener('keydown', (event) => {
+      keysPressed[event.key.toLowerCase()] = true;
+    });
+
+    document.addEventListener('keyup', (event) => {
+      keysPressed[event.key.toLowerCase()] = false;
+    });
+
+    function updateBasketVelocity() {
+      if (keysPressed['a']) basketVelocity.x = Math.max(basketVelocity.x - acceleration, -maxSpeed);
+      if (keysPressed['d']) basketVelocity.x = Math.min(basketVelocity.x + acceleration, maxSpeed);
+      if (keysPressed['w']) basketVelocity.y = Math.min(basketVelocity.y + acceleration, maxSpeed);
+      if (keysPressed['s']) basketVelocity.y = Math.max(basketVelocity.y - acceleration, -maxSpeed);
+
+      requestAnimationFrame(updateBasketVelocity);
+    }
+
+    updateBasketVelocity();
+
+    function increaseDifficulty() {
+      if (stars % 20 === 0) { // Increase difficulty every 20 stars
+        difficulty += 0.1;
+        updateDifficultyDisplay();
+      }
+    }
+
+    function updateDifficultyDisplay() {
+      let difficultyText = 'Normal';
+      if (difficulty > 1.5) difficultyText = 'Hard';
+      if (difficulty > 2) difficultyText = 'Expert';
+      if (difficulty > 2.5) difficultyText = 'Master';
+      difficultyLevelElement.textContent = `Difficulty: ${difficultyText}`;
+    }
+
+    // Initialize game
+    updateDisplay();
+    let starInterval = setInterval(createStar, 400); // Changed from 800 to 400 to double the star creation rate
+
+    // Create more stars initially
+    for (let i = 0; i < 10; i++) { // Changed from 5 to 10 to double the initial stars
+      setTimeout(createStar, i * 100); // Changed from 200 to 100 to create stars faster
+    }
+  </script>
+</body></html>
