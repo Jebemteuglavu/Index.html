@@ -1,0 +1,85 @@
+<html>
+<head>
+  <title>Dig To China</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Main Menu -->
+  <div id="main-menu">
+      <div class="logo">DIG TO CHINA</div>
+      <button id="main-menu-leaderboard-button">LEADERBOARD (WIP)</button>
+      <button id="casual-button">Casual</button>
+      <button id="speedrun-button">Speedrun (WIP)</button>
+  </div>
+  <div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+    
+    <!-- Depth Display -->
+    <div id="depth-display">DEPTH: <span id="depth">0</span></div>
+    
+    <!-- Timer Display -->
+    <div id="timer">00:00:00:000</div>
+    <div id="dynamite-cooldown">DYNAMITE: READY</div>
+    
+    <!-- Menu System -->
+    <button id="menu-button" class="menu-button">|||</button>
+    <div id="menu-panel" class="menu-panel" style="display: none;">
+      <button id="returnToSurface">▶ RETURN HOME</button>
+      <button id="showCollectedBlocks">▶ COLLECTED BLOCKS</button>
+      <button id="creditsButton">▶ CREDITS</button>
+    </div>
+    
+    <!-- Collected Blocks Panel -->
+    <div id="collected-blocks-panel" style="display: none;">
+      <h3>COLLECTED BLOCKS</h3>
+      <button class="close-button">×</button>
+      <div class="blocks-count">0</div>
+      <div class="block-list"></div>
+    </div>
+    
+    <!-- Credits Panel -->
+    <div id="credits-panel" style="display: none;">
+        <h3>CREDITS</h3>
+        <button class="close-button">×</button>
+        <div class="credits-list">
+          <p>Deadlyne</p>
+          <p>Mysz</p>
+          <p>Cat_the_monke</p>
+        </div>
+    </div>
+    
+    <!-- Shop Panel -->
+    <div id="stats" style="display: none;">
+      <h3>SHOP</h3>
+      <button class="close-button">×</button>
+      <div id="money">0</div>
+      <button id="sellBlocks">SELL BLOCKS</button>
+      <div id="shop">
+        <h3>UPGRADES</h3>
+        <button id="buyPickaxe">BUY PICKAXE (25)</button>
+        <button id="buyDynamite">BUY DYNAMITE (500)</button>
+      </div>
+    </div>
+    
+    <!-- Inventory Panel -->
+    <div id="inventory" style="display: none;"></div>
+    
+     <!-- Win Screen -->
+    <div id="win-screen" style="display: none;">
+      <div class="win-message">CONGRATULATIONS!</div>
+      <div id="final-time">Final Time: 0s</div>
+      <button id="leaderboard-button">VIEW LEADERBOARD</button>
+    </div>
+      
+   <!-- Leaderboard Panel -->
+    <div id="leaderboard-panel" style="display: none;">
+        <h3>LEADERBOARD</h3>
+        <button class="close-button">×</button>
+         <ol id="leaderboard-list"></ol>
+    </div>
+  </div>
+  
+  <script type="module" src="game.js"></script>
+</body>
+</html>
