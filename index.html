@@ -1,0 +1,468 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultimate Meme Creator</title>
+<style>
+.warning-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(45deg, #ff0000, #990000);
+  color: white;
+  text-align: center;
+  padding: 15px;
+  z-index: 1000;
+  font-weight: bold;
+  animation: pulse 2s infinite;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.01); }
+  100% { transform: scale(1); }
+}
+
+:root {
+  --primary: #2a2a72;
+  --secondary: #009ffd;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  min-height: 100vh;
+  color: white;
+  padding-top: 50px; /* Make room for warning banner */
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.1);
+  padding: 20px;
+  border-radius: 10px;
+  backdrop-filter: blur(5px);
+}
+
+.meme-canvas {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  background: #fff;
+  margin: 20px 0;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.meme-text {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 32px;
+  font-weight: bold;
+  text-shadow: 2px 2px 0 #000;
+  color: white;
+  text-align: center;
+  width: 90%;
+  word-wrap: break-word;
+}
+
+.top-text {
+  top: 20px;
+}
+
+.bottom-text {
+  bottom: 20px;
+}
+
+.controls {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 5px;
+  margin: 20px 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.template-image {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: transform 0.2s;
+}
+
+.template-image:hover {
+  transform: scale(1.1);
+}
+
+input, button, select {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+button {
+  background: var(--primary);
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+#imageInput {
+  display: none;
+}
+
+.custom-file-upload {
+  background: var(--secondary);
+  display: inline-block;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.download-btn {
+  background: #28a745;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 10px 20px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: var(--secondary);
+}
+
+.animation-controls {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.video-controls {
+  margin-top: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sfx-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+  background: rgba(0,0,0,0.1);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.sfx-button {
+  background: var(--primary);
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  text-align: center;
+}
+
+.sfx-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+</style>
+</head>
+<body>
+
+<div class="warning-overlay">
+  ⚠️ Warning: Keep content family-friendly! Inappropriate content will be removed.
+</div>
+
+<div class="container">
+  <h1>🎨 Ultimate Meme Creator v2.0</h1>
+  
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('static')">Static Meme</div>
+    <div class="tab" onclick="switchTab('animated')">Animated Meme</div>
+    <div class="tab" onclick="switchTab('video')">Video</div>
+  </div>
+
+  <div class="controls">
+    <input type="text" id="topText" placeholder="Top Text" oninput="updateMeme()">
+    <input type="text" id="bottomText" placeholder="Bottom Text" oninput="updateMeme()">
+    <label class="custom-file-upload">
+      <input type="file" id="imageInput" accept="image/*,video/*" onchange="loadMedia()">
+      Upload Media (Image/Video)
+    </label>
+  </div>
+
+  <div class="animation-controls" id="animationControls" style="display: none;">
+    <select id="animationType">
+      <option value="bounce">Bounce</option>
+      <option value="shake">Shake</option>
+      <option value="spin">Spin</option>
+      <option value="flash">Flash</option>
+    </select>
+    <button onclick="applyAnimation()">Apply Animation</button>
+  </div>
+
+  <div class="video-controls" id="videoControls" style="display: none;">
+    <button onclick="playPauseVideo()">Play/Pause</button>
+    <input type="range" id="videoProgress" min="0" max="100" value="0">
+  </div>
+
+  <h3>Sound Effects:</h3>
+  <div class="sfx-grid">
+    <button class="sfx-button" onclick="playSound('click.wav')">Click</button>
+    <button class="sfx-button" onclick="playSound('tada.mp3')">Tada!</button>
+    <button class="sfx-button" onclick="playSound('Pop-Up.ogg')">Pop</button>
+    <button class="sfx-button" onclick="playSound('START.mp3')">Start</button>
+    <button class="sfx-button" onclick="playSound('Vine boom sound effect.mp3')">Vine Boom</button>
+    <button class="sfx-button" onclick="playSound('Windows XP Error.mp3')">Error</button>
+    <button class="sfx-button" onclick="playSound('minecraft-rare-achievement.mp3')">Achievement</button>
+    <button class="sfx-button" onclick="playSound('Gunshot Sound Effect.wav')">Bang!</button>
+    <button class="sfx-button" onclick="playSound('explosion-6055.mp3')">Boom!</button>
+  </div>
+
+  <h3>Quick Templates:</h3>
+  <div class="template-grid">
+    <img src="happy-cat-cat.gif" class="template-image" onclick="useTemplate(this.src)">
+    <img src="epicfacespin.gif" class="template-image" onclick="useTemplate(this.src)">
+    <img src="SpongeBob_SquarePants_character [MConverter.eu].png" class="template-image" onclick="useTemplate(this.src)">
+    <img src="Peter_Griffin.png" class="template-image" onclick="useTemplate(this.src)">
+    <img src="cat-piano.gif" class="template-image" onclick="useTemplate(this.src)">
+    <img src="Patrick_Star.svg.png" class="template-image" onclick="useTemplate(this.src)">
+    <img src="an871k4o1sn51 (1).png" class="template-image" onclick="useTemplate(this.src)">
+    <img src="chicken spin.gif" class="template-image" onclick="useTemplate(this.src)">
+    <img src="dance-banana.gif" class="template-image" onclick="useTemplate(this.src)">
+    <img src="Sonic Running.gif" class="template-image" onclick="useTemplate(this.src)">
+    <img src="mariowalking.gif" class="template-image" onclick="useTemplate(this.src)">
+    <img src="run.gif" class="template-image" onclick="useTemplate(this.src)">
+    <img src="nerd.gif" class="template-image" onclick="useTemplate(this.src)">
+    <img src="Item_Glock-sharedassets4.assets-616.webp" class="template-image" onclick="useTemplate(this.src)">
+    <img src="MrBeastBoss.png" class="template-image" onclick="useTemplate(this.src)">
+    <img src="herobrine_steve.png" class="template-image" onclick="useTemplate(this.src)">
+  </div>
+
+  <div class="meme-canvas" id="memeCanvas">
+    <div class="meme-text top-text" id="topTextDisplay"></div>
+    <div class="meme-text bottom-text" id="bottomTextDisplay"></div>
+  </div>
+
+  <button class="download-btn" onclick="downloadMeme()">Download Meme</button>
+</div>
+
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script>
+let currentMode = 'static';
+let videoElement = null;
+
+function switchTab(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('animationControls').style.display = mode === 'animated' ? 'grid' : 'none';
+  document.getElementById('videoControls').style.display = mode === 'video' ? 'grid' : 'none';
+}
+
+function updateMeme() {
+  const topText = document.getElementById('topText').value;
+  const bottomText = document.getElementById('bottomText').value;
+  
+  document.getElementById('topTextDisplay').textContent = topText.toUpperCase();
+  document.getElementById('bottomTextDisplay').textContent = bottomText.toUpperCase();
+}
+
+function loadMedia() {
+  const input = document.getElementById('imageInput');
+  const canvas = document.getElementById('memeCanvas');
+  
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const isVideo = file.type.startsWith('video/');
+    
+    if (isVideo) {
+      if (!videoElement) {
+        videoElement = document.createElement('video');
+        videoElement.controls = true;
+        canvas.appendChild(videoElement);
+      }
+      videoElement.src = URL.createObjectURL(file);
+      canvas.style.backgroundImage = 'none';
+    } else {
+      if (videoElement) {
+        videoElement.remove();
+        videoElement = null;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        canvas.style.backgroundImage = `url('${e.target.result}')`;
+        canvas.style.backgroundSize = 'cover';
+        canvas.style.backgroundPosition = 'center';
+      }
+      reader.readAsDataURL(file);
+    }
+  }
+}
+
+function playPauseVideo() {
+  if (videoElement) {
+    if (videoElement.paused) {
+      videoElement.play();
+    } else {
+      videoElement.pause();
+    }
+  }
+}
+
+function useTemplate(src) {
+  const canvas = document.getElementById('memeCanvas');
+  if (videoElement) {
+    videoElement.remove();
+    videoElement = null;
+  }
+  canvas.style.backgroundImage = `url('${src}')`;
+  canvas.style.backgroundSize = 'cover';
+  canvas.style.backgroundPosition = 'center';
+}
+
+function applyAnimation() {
+  const canvas = document.getElementById('memeCanvas');
+  const type = document.getElementById('animationType').value;
+  
+  canvas.style.animation = 'none';
+  canvas.offsetHeight;
+  
+  switch(type) {
+    case 'bounce':
+      canvas.style.animation = 'bounce 1s infinite';
+      break;
+    case 'shake':
+      canvas.style.animation = 'shake 0.5s infinite';
+      break;
+    case 'spin':
+      canvas.style.animation = 'spin 2s infinite linear';
+      break;
+    case 'flash':
+      canvas.style.animation = 'flash 1s infinite';
+      break;
+  }
+}
+
+function downloadMeme() {
+  html2canvas(document.getElementById('memeCanvas')).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'my-meme.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+}
+
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+  
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  @keyframes flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+`;
+document.head.appendChild(style);
+
+document.querySelectorAll('input, button, select').forEach(element => {
+  element.addEventListener('focus', function() {
+    this.style.transform = 'scale(1.02)';
+  });
+  
+  element.addEventListener('blur', function() {
+    this.style.transform = 'scale(1)';
+  });
+});
+
+// Add sound functionality
+function playSound(soundFile) {
+  const audio = new Audio(soundFile);
+  audio.play();
+}
+
+// Add video player enhancements
+if (videoElement) {
+  videoElement.addEventListener('timeupdate', function() {
+    const progress = (videoElement.currentTime / videoElement.duration) * 100;
+    document.getElementById('videoProgress').value = progress;
+  });
+
+  document.getElementById('videoProgress').addEventListener('input', function() {
+    const time = (videoElement.duration * this.value) / 100;
+    videoElement.currentTime = time;
+  });
+}
+
+// Add sound effects to UI interactions
+document.querySelectorAll('button').forEach(button => {
+  button.addEventListener('click', () => {
+    playSound('click.wav');
+  });
+});
+
+// Warning banner enhancement
+const warningOverlay = document.querySelector('.warning-overlay');
+setTimeout(() => {
+  warningOverlay.style.transform = 'translateY(-100%)';
+  warningOverlay.style.transition = 'transform 0.5s ease-in-out';
+}, 5000);
+
+// Add a timeout to remove warning after 5 seconds
+setTimeout(() => {
+  warningOverlay.style.display = 'none';
+}, 5000);
+</script>
+</body></html>
