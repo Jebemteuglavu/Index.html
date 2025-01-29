@@ -1,0 +1,181 @@
+<style>
+body {
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  background-color: #ffd700;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  background-color: white;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.2);
+  text-align: center;
+  max-width: 800px;
+  width: 90%;
+}
+
+h1 {
+  color: #ff4500;
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+button {
+  background-color: #ff4500;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  font-size: 1.2em;
+  cursor: pointer;
+  border-radius: 50px;
+  margin-top: 20px;
+  transition: transform 0.3s, background-color 0.3s;
+  font-weight: bold;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+button:hover {
+  background-color: #ff6347;
+  transform: scale(1.05);
+}
+
+#workout {
+  margin-top: 30px;
+  font-size: 1.2em;
+  line-height: 1.6;
+  background-color: #f0f8ff;
+  padding: 20px;
+  border-radius: 15px;
+  border: 3px dashed #ff4500;
+  text-align: left;
+}
+
+.emoji {
+  font-size: 1.5em;
+  margin: 0 5px;
+}
+
+.exercise {
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.exercise-title {
+  font-weight: bold;
+  color: #ff4500;
+  margin-bottom: 10px;
+}
+
+.exercise-description {
+  margin-bottom: 10px;
+}
+
+.exercise-image {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  margin: 10px auto;
+  display: block;
+  border: 2px solid #ff4500;
+  border-radius: 10px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>
+    <span class="emoji">🤪</span>
+    Wacky WOD Wizard
+    <span class="emoji">🏋️‍♂️</span>
+  </h1>
+  <button onclick="generateWorkout()">Summon a Silly Sweat Session!</button>
+  <div id="workout"></div>
+</div>
+
+<script>
+const exercises = [
+  {
+    name: "Burpees with jazz hands",
+    description: "Perform a standard burpee, but add jazz hands at the top of the jump. Make sure your fingers are spread wide and your hands are shaking for maximum jazz effect!",
+    image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YwZjBmMCIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjE1MCIgcj0iNDAiIGZpbGw9IiNmZjQ1MDAiLz48bGluZSB4MT0iNjAiIHkxPSIxNTAiIHgyPSI0MCIgeTI9IjEwMCIgc3Ryb2tlPSIjZmY0NTAwIiBzdHJva2Utd2lkdGg9IjQiLz48bGluZSB4MT0iMTQwIiB5MT0iMTUwIiB4Mj0iMTYwIiB5Mj0iMTAwIiBzdHJva2U9IiNmZjQ1MDAiIHN0cm9rZS13aWR0aD0iNCIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjYwIiByPSIyMCIgZmlsbD0iI2ZmNDUwMCIvPjx0ZXh0IHg9IjEwMCIgeT0iMTgwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMwMDAiPkJ1cnBlZSB3aXRoIEphenogSGFuZHM8L3RleHQ+PC9zdmc+"
+  },
+  {
+    name: "Kettlebell swings while singing your favorite 80s hit",
+    description: "Grab a kettlebell and perform standard swings, but belt out your favorite 80s song while doing so. The louder and more off-key, the better!",
+    image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YwZjBmMCIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjE1MCIgcj0iNDAiIGZpbGw9IiNmZjQ1MDAiLz48bGluZSB4MT0iMTAwIiB5MT0iMTUwIiB4Mj0iMTAwIiB5Mj0iNTAiIHN0cm9rZT0iI2ZmNDUwMCIgc3Ryb2tlLXdpZHRoPSI0Ii8+PGNpcmNsZSBjeD0iMTAwIiBjeT0iNTAiIHI9IjIwIiBmaWxsPSIjMDAwIi8+PHRleHQgeD0iMTAwIiB5PSIxODAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzAwMCI+S2V0dGxlYmVsbCBTd2luZyAmYW1wOyBTaW5nPC90ZXh0Pjx0ZXh0IHg9IjEwMCIgeT0iMzAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzAwMCI+8J+SuDwvdGV4dD48L3N2Zz4="
+  },
+  {
+    name: "Box jumps in scuba flippers",
+    description: "Put on a pair of scuba flippers (or imagine you're wearing them) and perform box jumps. Focus on maintaining balance and embracing the awkwardness!",
+    image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YwZjBmMCIvPjxyZWN0IHg9IjUwIiB5PSIxMDAiIHdpZHRoPSIxMDAiIGhlaWdodD0iNTAiIGZpbGw9IiNmZjQ1MDAiLz48Y2lyY2xlIGN4PSIxMDAiIGN5PSI3MCIgcj0iMjAiIGZpbGw9IiNmZjQ1MDAiLz48bGluZSB4MT0iMTAwIiB5MT0iOTAiIHgyPSI4MCIgeTI9IjEwMCIgc3Ryb2tlPSIjZmY0NTAwIiBzdHJva2Utd2lkdGg9IjQiLz48bGluZSB4MT0iMTAwIiB5MT0iOTAiIHgyPSIxMjAiIHkyPSIxMDAiIHN0cm9rZT0iI2ZmNDUwMCIgc3Ryb2tlLXdpZHRoPSI0Ii8+PHBvbHlnb24gcG9pbnRzPSI3MCwxNTAgOTAsMTUwIDEwMCwxNzAgMTEwLDE1MCAxMzAsMTUwIiBmaWxsPSIjMDBmIi8+PHRleHQgeD0iMTAwIiB5PSIxOTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzAwMCI+Qm94IEp1bXBzIGluIEZsaXBwZXJzPC90ZXh0PjwvbXNnPg=="
+  },
+  {
+    name: "Wall balls using a beach ball",
+    description: "Replace your medicine ball with a beach ball. Perform wall balls as usual, but expect some unpredictable bounces! Embrace the chaos and keep moving.",
+    image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YwZjBmMCIvPjxyZWN0IHg9IjE3MCIgeT0iMCIgd2lkdGg9IjMwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2ZmNDUwMCIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjE1MCIgcj0iNDAiIGZpbGw9IiNmZjQ1MDAiLz48Y2lyY2xlIGN4PSI4MCIgY3k9IjUwIiByPSIzMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmYwMDAwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1kYXNoYXJyYXk9IjUsMiIvPjxsaW5lIHgxPSIxMDAiIHkxPSIxNTAiIHgyPSI4MCIgeTI9IjUwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWRhc2hhcnJheT0iNSwyIi8+PHRleHQgeD0iMTAwIiB5PSIxOTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzAwMCI+V2FsbCBCYWxscyB3aXRoIEJlYWNoIEJhbGw8L3RleHQ+PC9zdmc+"
+  },
+  {
+    name: "Deadlifts with inflatable weights",
+    description: "Use inflatable toys or pool floats as your 'weights'. Perform deadlifts as usual, but exaggerate the effort as if they're extremely heavy. Don't forget to grunt dramatically!",
+    image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YwZjBmMCIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iNDAiIGZpbGw9IiNmZjQ1MDAiLz48bGluZSB4MT0iNDAiIHkxPSIxMjAiIHgyPSIxNjAiIHkyPSIxMjAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSI0Ii8+PGNpcmNsZSBjeD0iNDAiIGN5PSIxMjAiIHI9IjIwIiBmaWxsPSJub25lIiBzdHJva2U9IiMwMGYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWRhc2hhcnJheT0iNSwyIi8+PGNpcmNsZSBjeD0iMTYwIiBjeT0iMTIwIiByPSIyMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDBmIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1kYXNoYXJyYXk9IjUsMiIvPjx0ZXh0IHg9IjEwMCIgeT0iMTgwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMwMDAiPkRlYWRsaWZ0cyB3aXRoIEluZmxhdGFibGVzPC90ZXh0Pjwvc3ZnPg=="
+  }
+];
+
+const modifiers = [
+  "while balancing a rubber chicken on your head",
+  "in slow motion",
+  "as if you're underwater",
+  "like a T-Rex (tiny arms!)",
+  "as dramatically as possible",
+  "while trying not to laugh",
+  "in your best superhero pose",
+  "as if the floor is lava",
+  "while speaking in a foreign accent",
+  "as if you're in a silent movie",
+  "while wearing oven mitts",
+  "as if you're a secret agent",
+  "like you're at a disco",
+  "as if gravity is extra strong today"
+];
+
+function generateWorkout() {
+  const roundCount = Math.floor(Math.random() * 3) + 3; // 3-5 rounds
+  const exerciseCount = Math.floor(Math.random() * 3) + 2; // 2-4 exercises per round
+  
+  let workout = `<h2>🎭 Today's Wacky Workout 🎭</h2>
+
+<p>${roundCount} Rounds of Ridiculous Reps:</p>
+`;
+  
+  for (let i = 0; i < exerciseCount; i++) {
+    const reps = Math.floor(Math.random() * 15) + 5; // 5-20 reps
+    const exercise = exercises[Math.floor(Math.random() * exercises.length)];
+    const modifier = modifiers[Math.floor(Math.random() * modifiers.length)];
+    
+    workout += `
+<div class="exercise">
+  <div class="exercise-title">${reps} ${exercise.name} ${modifier}</div>
+  <div class="exercise-description">${exercise.description}</div>
+  <div class="modifier-description">Additional challenge: ${modifier}</div>
+  <img src="${exercise.image}" alt="${exercise.name}" class="exercise-image">
+</div>`;
+  }
+  
+  workout += `
+<p>Remember: The sillier you look, the better you're doing! 🤡💪</p>
+<p>Disclaimer: Please exercise caution and listen to your body. If any exercise feels unsafe or causes discomfort, modify or skip it. Stay hydrated and have fun!</p>`;
+  
+  document.getElementById('workout').innerHTML = workout;
+}
+</script>
+</body></html>
