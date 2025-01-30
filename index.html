@@ -1,0 +1,382 @@
+<style>
+:root {
+  --sponge-yellow: #fdec6e;
+  --sponge-brown: #a76e06;
+  --ocean-blue: #3db2ff;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  background: var(--ocean-blue);
+  font-family: "Comic Sans MS", cursive;
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.9);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.2);
+}
+
+.spongebob {
+  width: 200px;
+  height: 200px;
+  margin: 20px auto;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+.bubble {
+  position: absolute;
+  pointer-events: none;
+  animation: float 8s linear infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(100vh); opacity: 1; }
+  100% { transform: translateY(-100px); opacity: 0; }
+}
+
+.jellyfishing-game {
+  height: 300px;
+  border: 3px solid var(--sponge-brown);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--ocean-blue) 0%, #1a4b7c 100%);
+  cursor: pointer;
+}
+
+.jellyfish {
+  position: absolute;
+  transition: all 0.3s ease;
+}
+
+.net {
+  position: absolute;
+  display: none;
+}
+
+.surfing-game {
+  height: 300px;
+  border: 3px solid var(--sponge-brown);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--ocean-blue) 0%, #1a4b7c 100%);
+  margin-top: 20px;
+}
+
+.surfer {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  bottom: 100px;
+  left: 50px;
+  transition: transform 0.3s ease;
+}
+
+.wave {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 100px;
+}
+
+.obstacle {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  right: -30px;
+}
+
+button {
+  background: var(--sponge-yellow);
+  border: 3px solid var(--sponge-brown);
+  padding: 10px 20px;
+  font-family: inherit;
+  font-size: 1.2em;
+  cursor: pointer;
+  margin: 10px;
+  border-radius: 10px;
+}
+
+button:hover {
+  transform: scale(1.1);
+}
+
+.laugh-text {
+  font-size: 24px;
+  color: var(--sponge-brown);
+  text-align: center;
+  margin: 20px;
+  animation: wobble 0.5s infinite;
+}
+
+@keyframes wobble {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+.score {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  color: white;
+}
+
+.music-button {
+  background: #ff69b4;
+  border: 3px solid var(--sponge-brown);
+  padding: 10px 20px;
+  font-family: inherit;
+  font-size: 1.2em;
+  cursor: pointer;
+  margin: 10px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.music-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+.music-button:hover {
+  transform: scale(1.1);
+  background: #ff8ac5;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1 style="text-align: center; color: var(--sponge-brown);">SpongeBob's Fun Pack! 🌊</h1>
+  
+  <svg class="spongebob" viewBox="0 0 100 100">
+    <rect x="20" y="20" width="60" height="60" fill="var(--sponge-yellow)" />
+    <circle cx="35" cy="40" r="8" fill="white" stroke="black" stroke-width="2"/>
+    <circle cx="65" cy="40" r="8" fill="white" stroke="black" stroke-width="2"/>
+    <circle cx="35" cy="40" r="3" fill="black"/>
+    <circle cx="65" cy="40" r="3" fill="black"/>
+    <path d="M 40 60 Q 50 70 60 60" fill="none" stroke="black" stroke-width="2"/>
+  </svg>
+
+  <div class="laugh-text">ARE YA READY KIDS?!</div>
+
+  <div class="jellyfishing-game">
+    <!-- Jellyfish will be added here by JavaScript -->
+  </div>
+
+  <div class="surfing-game">
+    <div class="score">Score: 0</div>
+  </div>
+
+  <button onclick="startGame()">Start Jellyfishing!</button>
+  <button onclick="startSurfing()">Start Surfing!</button>
+  <button onclick="playLaugh()">Laugh Like SpongeBob!</button>
+  
+  <button class="music-button" onclick="toggleMusic()">
+    <svg viewBox="0 0 24 24">
+      <path fill="currentColor" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+    </svg>
+    Listen to Music
+  </button>
+
+  <audio id="laughSound" src="/seinfeld-season-7-closing-credits.mp3"></audio>
+  <audio id="surfMusic" src="/FEX - Subways Of Your Mind [The Most Mysterious Song On The Internet aka Like The Wind FOUND!!!].mp3"></audio>
+</div>
+
+<script>
+const laughSounds = ["BAHAHAHA!", "WHOOOOOO!", "I'M READY!", "F IS FOR FRIENDS!"];
+let gameActive = false;
+let surfingActive = false;
+let score = 0;
+let surferY = 100;
+let obstacles = [];
+let musicPlaying = false;
+
+function toggleMusic() {
+  const music = document.getElementById('surfMusic');
+  if (musicPlaying) {
+    music.pause();
+    musicPlaying = false;
+  } else {
+    music.play();
+    musicPlaying = true;
+  }
+}
+
+function addBubble() {
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.style.left = Math.random() * window.innerWidth + 'px';
+  bubble.innerHTML = `
+    <svg width="30" height="30" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="40" fill="rgba(255,255,255,0.5)"/>
+    </svg>
+  `;
+  document.body.appendChild(bubble);
+  bubble.addEventListener('animationend', () => bubble.remove());
+}
+
+setInterval(addBubble, 500);
+
+function startSurfing() {
+  const game = document.querySelector('.surfing-game');
+  game.innerHTML = '<div class="score">Score: 0</div>';
+  score = 0;
+  surfingActive = true;
+  
+  const surfer = document.createElement('div');
+  surfer.className = 'surfer';
+  surfer.innerHTML = `
+    <svg viewBox="0 0 100 100">
+      <rect x="40" y="20" width="20" height="40" fill="var(--sponge-yellow)"/>
+      <rect x="30" y="60" width="40" height="10" fill="#1a4b7c"/>
+    </svg>
+  `;
+  game.appendChild(surfer);
+
+  const music = document.getElementById('surfMusic');
+  music.currentTime = 0;
+  music.play();
+  musicPlaying = true;
+
+  document.addEventListener('keydown', (e) => {
+    if(e.code === 'Space' && surfingActive) {
+      surferY = 150;
+      surfer.style.bottom = surferY + 'px';
+      setTimeout(() => {
+        if(surfingActive) { 
+          surferY = 100;
+          surfer.style.bottom = surferY + 'px';
+        }
+      }, 500);
+    }
+  });
+
+  const spawnObstacle = () => {
+    if(!surfingActive) return;
+    
+    const obstacle = document.createElement('div');
+    obstacle.className = 'obstacle';
+    obstacle.innerHTML = `
+      <svg viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="40" fill="#ff4444"/>
+      </svg>
+    `;
+    obstacle.style.bottom = '100px';
+    game.appendChild(obstacle);
+    
+    let position = game.offsetWidth;
+    const moveObstacle = () => {
+      if(!surfingActive) {
+        obstacle.remove();
+        return;
+      }
+      
+      position -= 5;
+      obstacle.style.right = game.offsetWidth - position + 'px';
+      
+      const surferRect = document.querySelector('.surfer').getBoundingClientRect();
+      const obstacleRect = obstacle.getBoundingClientRect();
+      
+      if(position < -30) {
+        obstacle.remove();
+        score += 1;
+        document.querySelector('.score').textContent = `Score: ${score}`;
+      } else if(
+        surferRect.right > obstacleRect.left &&
+        surferRect.left < obstacleRect.right &&
+        surferRect.bottom > obstacleRect.top &&
+        surferRect.top < obstacleRect.bottom
+      ) {
+        endSurfing();
+      } else {
+        requestAnimationFrame(moveObstacle);
+      }
+    };
+    
+    requestAnimationFrame(moveObstacle);
+  };
+
+  const obstacleInterval = setInterval(spawnObstacle, 2000);
+}
+
+function endSurfing() {
+  surfingActive = false;
+  document.getElementById('surfMusic').pause();
+  musicPlaying = false;
+  alert(`Game Over! Score: ${score}`);
+  const game = document.querySelector('.surfing-game');
+  game.innerHTML = '<div class="score">Score: 0</div>';
+}
+
+function startGame() {
+  const game = document.querySelector('.jellyfishing-game');
+  game.innerHTML = '';
+  gameActive = true;
+  
+  for(let i = 0; i < 5; i++) {
+    const jellyfish = document.createElement('div');
+    jellyfish.className = 'jellyfish';
+    jellyfish.innerHTML = `
+      <svg width="50" height="50" viewBox="0 0 100 100">
+        <path d="M 50 20 Q 20 50 20 80 Q 50 60 80 80 Q 80 50 50 20" 
+              fill="#ff69b4" opacity="0.7"/>
+      </svg>
+    `;
+    jellyfish.style.left = Math.random() * (game.offsetWidth - 50) + 'px';
+    jellyfish.style.top = Math.random() * (game.offsetHeight - 50) + 'px';
+    game.appendChild(jellyfish);
+    
+    setInterval(() => {
+      if(gameActive) {
+        jellyfish.style.left = Math.random() * (game.offsetWidth - 50) + 'px';
+        jellyfish.style.top = Math.random() * (game.offsetHeight - 50) + 'px';
+      }
+    }, 2000);
+  }
+
+  game.addEventListener('click', (e) => {
+    const net = document.createElement('div');
+    net.className = 'net';
+    net.innerHTML = `
+      <svg width="60" height="60" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="white" stroke-width="5"/>
+        <line x1="50" y1="5" x2="50" y2="95" stroke="white" stroke-width="5"/>
+      </svg>
+    `;
+    net.style.left = (e.clientX - game.getBoundingClientRect().left - 30) + 'px';
+    net.style.top = (e.clientY - game.getBoundingClientRect().top - 30) + 'px';
+    game.appendChild(net);
+    net.style.display = 'block';
+    
+    setTimeout(() => net.remove(), 500);
+  });
+}
+
+function playLaugh() {
+  const laughText = document.querySelector('.laugh-text');
+  laughText.textContent = laughSounds[Math.floor(Math.random() * laughSounds.length)];
+  laughText.style.animation = 'none';
+  laughText.offsetHeight;
+  laughText.style.animation = 'wobble 0.5s infinite';
+  
+  const audio = document.getElementById('laughSound');
+  audio.currentTime = 0;
+  audio.play();
+}
+</script>
+
+</body></html>
