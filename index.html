@@ -1,0 +1,181 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lady Di Token</title>
+
+<style>
+body {
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d2d4d 100%);
+    min-height: 100vh;
+    font-family: 'Arial', sans-serif;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.token-container {
+    max-width: 800px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    animation: glow 2s infinite alternate;
+    backdrop-filter: blur(10px);
+}
+
+.token-image {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    margin: 20px auto;
+    border: 4px solid gold;
+    object-fit: cover;
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+    transition: transform 0.3s ease;
+}
+
+.token-image:hover {
+    transform: scale(1.05);
+}
+
+.token-name {
+    font-size: 2.5rem;
+    background: linear-gradient(45deg, #ffd700, #ffa500);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin: 1rem 0;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.token-description {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin: 1rem 0;
+    color: #e0e0e0;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.mystery-text {
+    font-style: italic;
+    color: #ffd700;
+    font-size: 1.1rem;
+    margin: 1rem 0;
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { color: #ffd700; }
+    50% { color: #fff5cc; }
+    100% { color: #ffd700; }
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    }
+    to {
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+    }
+}
+
+.token-stats {
+    display: flex;
+    justify-content: space-around;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.stat {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1.2rem;
+    border-radius: 10px;
+    min-width: 150px;
+    margin: 10px;
+    transition: transform 0.3s ease;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.stat:hover {
+    transform: translateY(-5px);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    color: gold;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+    <div class="token-container">
+        <img src="/5CD2A079-67D0-4023-919D-CD4FAC08ED19.png" alt="Lady Di Token" class="token-image">
+        <h1 class="token-name">Lady Di Token</h1>
+        <p class="mystery-text">"The People's Token"</p>
+        <p class="token-description">
+            Introducing the most mysterious and desired new Solana token - Lady Di ($LADYDI). 
+            A tribute to grace, compassion, and revolutionary spirit.
+        </p>
+        
+        <div class="token-stats">
+            <div class="stat">
+                <div class="stat-value">2M</div>
+                <div class="stat-label">Total Supply</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">0%</div>
+                <div class="stat-label">Tax</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">LP</div>
+                <div class="stat-label">Locked</div>
+            </div>
+        </div>
+        
+        <p class="token-description">
+            Join the royal revolution on Solana. Community-driven, 
+            transparent, and dedicated to carrying forward a legacy of positive change.
+        </p>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.querySelector('.token-container');
+        const stats = document.querySelectorAll('.stat');
+        
+        container.addEventListener('mouseover', function() {
+            container.style.transform = 'scale(1.02)';
+            container.style.transition = 'transform 0.3s ease';
+        });
+        
+        container.addEventListener('mouseout', function() {
+            container.style.transform = 'scale(1)';
+        });
+
+        stats.forEach(stat => {
+            stat.addEventListener('mouseover', function() {
+                this.style.boxShadow = '0 0 15px rgba(255, 215, 0, 0.5)';
+            });
+            
+            stat.addEventListener('mouseout', function() {
+                this.style.boxShadow = 'none';
+            });
+        });
+    });
+    </script>
+</body></html>
