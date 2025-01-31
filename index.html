@@ -1,0 +1,320 @@
+<title>Multiverse.Maps - Neural Network of Realities</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap');
+:root {
+  --primary-color: #4ecdc4;
+  --secondary-color: #45b7d1;
+  --background-color: #080c1f;
+  --text-color: #e0e0ff;
+  --sidebar-bg: rgba(22, 33, 62, 0.8);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font: 400 16px/1.5 'Roboto', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+#header, #sidebar {
+  background-color: var(--sidebar-bg);
+  padding: 10px 20px;
+}
+#header {
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+#logo {
+  font: 700 24px 'Orbitron', sans-serif;
+  color: var(--primary-color);
+  text-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+  margin-right: 20px;
+  white-space: nowrap;
+}
+#search-form { width: 33.33%; }
+#search-container { 
+  position: relative;
+  width: 100%;
+}
+#search-bar {
+  width: 100%;
+  padding: 8px 15px 8px 35px;
+  border: none;
+  border-radius: 20px;
+  background-color: var(--sidebar-bg);
+  color: var(--text-color);
+  font-size: 14px;
+}
+#search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--primary-color);
+}
+#map-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+#sidebar {
+  width: 250px;
+  overflow-y: auto;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+}
+#multiverse-map {
+  flex-grow: 1;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle, #1a2a4a 0%, var(--background-color) 100%);
+}
+.realm-btn {
+  background-color: var(--primary-color);
+  color: var(--background-color);
+  border: none;
+  padding: 4px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  font: 700 12px 'Orbitron', sans-serif;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  margin-right: 5px;
+}
+h3 {
+  font: 700 18px 'Orbitron', sans-serif;
+  color: var(--primary-color);
+  margin-top: 15px;
+}
+.realm-preview {
+  background-color: rgba(78, 205, 196, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.realm-preview p { font-size: 12px; margin-bottom: 8px; }
+.node-name {
+  font-size: 10px;
+  fill: var(--text-color);
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+.link { 
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 1px;
+}
+.node circle { 
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+.node:hover circle { 
+  stroke: var(--primary-color);
+  stroke-width: 2.5px;
+}
+.link.active { 
+  stroke: var(--primary-color);
+  stroke-width: 2px;
+}
+.divider {
+  border-top: 1px solid var(--primary-color);
+  margin: 15px 0;
+  opacity: 0.5;
+}
+</style>
+</head>
+<body>
+<div id="header">
+  <div id="logo">Multiverse.Maps</div>
+  <form id="search-form" action="/search" method="GET">
+    <div id="search-container">
+      <i id="search-icon">🔍</i>
+      <input type="text" id="search-bar" name="q" placeholder="Search realities..." aria-label="Search realities">
+    </div>
+  </form>
+</div>
+<div id="map-container">
+  <div id="sidebar">
+    <div id="realm-info">
+      <div class="divider"></div>
+      <h3>Select a Realm</h3>
+      <p>Click on a node in the map to view realm information.</p>
+    </div>
+  </div>
+  <div id="multiverse-map"></div>
+</div>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentRealm = urlParams.get('realm') || 'multiverse';
+
+  const width = document.getElementById('multiverse-map').clientWidth;
+  const height = document.getElementById('multiverse-map').clientHeight;
+  const svg = d3.select("#multiverse-map").append("svg")
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .attr("viewBox", [0, 0, width, height]);
+  const g = svg.append("g");
+  const zoom = d3.zoom().scaleExtent([0.1, 10]).on("zoom", event => g.attr("transform", event.transform));
+  svg.call(zoom);
+
+  const realities = [
+    {id: 1, name: "Prime Reality", color: "#ffffff", description: "The central reality from which all others branch."},
+    {id: 2, name: "Retro-Futuristic 1960s", color: "#ff6b6b", description: "A world where the aesthetic and technological dreams of the 1960s became reality."},
+    {id: 3, name: "Aquatic Civilization", color: "#4ecdc4", description: "Humanity evolved to live underwater, building vast cities in the ocean depths."},
+    {id: 4, name: "Ice Age Persistent", color: "#45b7d1", description: "The last ice age never ended, and humans adapted to life in a frozen world."},
+    {id: 5, name: "Solar System Colonized", color: "#f7b731", description: "Humanity has spread throughout the solar system, terraforming and inhabiting multiple planets and moons."},
+    {id: 6, name: "Steampunk 1889", color: "#c0392b", description: "Victorian era with advanced steam technology, where brass and steam power rule the world."},
+    {id: 7, name: "Cyberpunk 2099", color: "#8e44ad", description: "A high-tech, low-life future world dominated by megacorporations and cybernetic enhancements."},
+    {id: 8, name: "Magic-Dominant Earth", color: "#27ae60", description: "A world where magic, not science, became the primary force driving civilization's advancement."},
+    {id: 9, name: "Post-Apocalyptic Wasteland", color: "#d35400", description: "A desolate world recovering from a global catastrophe."},
+    {id: 10, name: "Utopian Eco-Society", color: "#2ecc71", description: "A harmonious world where humanity lives in perfect balance with nature."},
+    {id: 11, name: "Quantum Realm", color: "#9b59b6", description: "A reality where the laws of quantum mechanics apply at a macroscopic scale."},
+    {id: 12, name: "Miniature Universe", color: "#e74c3c", description: "A world where everything, including people, exists at a microscopic scale."},
+  ];
+
+  function generateRealmData(realm) {
+    const subRealities = [];
+    const subLinks = [];
+    const numSubRealities = Math.floor(Math.random() * 8) + 5; // 5 to 12 sub-realities
+
+    for (let i = 1; i <= numSubRealities; i++) {
+      subRealities.push({
+        id: i,
+        name: `${realm.name} Variant ${i}`,
+        color: d3.color(realm.color).brighter(Math.random()).formatHex(),
+        description: `A variation of ${realm.name} with unique characteristics.`
+      });
+    }
+
+    for (let i = 0; i < subRealities.length; i++) {
+      for (let j = i + 1; j < subRealities.length; j++) {
+        if (Math.random() > 0.5) {
+          subLinks.push({source: subRealities[i].id, target: subRealities[j].id});
+        }
+      }
+    }
+
+    return {subRealities, subLinks};
+  }
+
+  function createMap(realm) {
+    g.selectAll("*").remove();
+
+    let mapData;
+    if (realm === 'multiverse') {
+      mapData = {subRealities: realities, subLinks: links};
+    } else {
+      const selectedRealm = realities.find(r => r.name.toLowerCase() === realm.toLowerCase());
+      mapData = generateRealmData(selectedRealm);
+    }
+
+    const simulation = d3.forceSimulation(mapData.subRealities)
+      .force("link", d3.forceLink(mapData.subLinks).id(d => d.id).distance(200))
+      .force("charge", d3.forceManyBody().strength(-800))
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("collision", d3.forceCollide().radius(50));
+
+    const link = g.selectAll(".link")
+      .data(mapData.subLinks)
+      .join("line")
+      .attr("class", "link");
+
+    const node = g.selectAll(".node")
+      .data(mapData.subRealities)
+      .join("g")
+      .attr("class", "node")
+      .call(d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended));
+
+    node.append("circle")
+      .attr("r", 20)
+      .attr("fill", d => d.color);
+
+    node.append("text")
+      .attr("class", "node-name")
+      .text(d => d.name)
+      .attr("dy", 30);
+
+    node.on("click", (event, d) => { 
+      updateSidebar(d); 
+      highlightConnections(d); 
+    });
+
+    simulation.on("tick", () => {
+      link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+      node.attr("transform", d => `translate(${d.x},${d.y})`);
+    });
+
+    function dragstarted(event) {
+      if (!event.active) simulation.alphaTarget(0.3).restart();
+      event.subject.fx = event.subject.x;
+      event.subject.fy = event.subject.y;
+    }
+
+    function dragged(event) {
+      event.subject.fx = event.x;
+      event.subject.fy = event.y;
+    }
+
+    function dragended(event) {
+      if (!event.active) simulation.alphaTarget(0);
+      event.subject.fx = null;
+      event.subject.fy = null;
+    }
+
+    function highlightConnections(d) {
+      link.classed("active", l => l.source.id === d.id || l.target.id === d.id);
+      node.classed("active", n => n.id === d.id || mapData.subLinks.some(l => (l.source.id === d.id && l.target.id === n.id) || (l.target.id === d.id && l.source.id === n.id)));
+    }
+  }
+
+  const links = realities.flatMap((r1, i) => 
+    realities.slice(i + 1).map(r2 => Math.random() > 0.5 ? {source: r1.id, target: r2.id} : null).filter(Boolean)
+  );
+
+  createMap(currentRealm);
+
+  function updateSidebar(realm) {
+    document.getElementById('realm-info').innerHTML = `
+      <div class="divider"></div>
+      <h3>${realm.name}</h3>
+      <div class="realm-preview">
+        <p>${realm.description}</p>
+        <button onclick="loadRealm('${realm.name}')" class="realm-btn">Map</button>
+        <a href="/${realm.name.toLowerCase().replace(/\s+/g, '-')}" class="realm-btn">Homepage</a>
+      </div>
+    `;
+  }
+
+  window.loadRealm = (realmName) => {
+    window.location.href = `?realm=${encodeURIComponent(realmName)}`;
+  };
+
+  document.getElementById('search-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const searchQuery = document.getElementById('search-bar').value;
+    window.location.href = `?realm=${encodeURIComponent(searchQuery)}`;
+  });
+
+  // If a specific realm is loaded, update the sidebar
+  if (currentRealm !== 'multiverse') {
+    const realm = realities.find(r => r.name.toLowerCase() === currentRealm.toLowerCase());
+    if (realm) {
+      updateSidebar(realm);
+    }
+  }
+});
+</script>
+</body>
+</html>
