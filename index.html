@@ -1,0 +1,870 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Distortion Lab</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Inline SVG filter for Liquid Effects -->
+  <svg width="0" height="0">
+    <filter id="liquidFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02 0.02" numOctaves="3" result="turbulence"/>
+      <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="20" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+  <div class="container">
+    <header>
+      <div class="browser-notice">
+        ⚠️ Note: This application works best in Chrome-based browsers for optimal performance and compatibility.
+      </div>
+      <h1>Video Distortion Lab</h1>
+      <p>Upload a video and gradually add distortion effects using the sliders below</p>
+    </header>
+
+    <div class="upload-section">
+      <label for="video-upload" class="upload-btn">
+        Choose Video File
+        <input type="file" id="video-upload" accept="video/*">
+      </label>
+      <!-- New 'Use Webcam' button added to allow using the user's webcam as video input -->
+      <button id="use-webcam-btn" class="upload-btn">Use Webcam</button>
+    </div>
+
+    <div class="canvas-container">
+      <button class="fullscreen-btn" aria-label="Toggle fullscreen">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+        </svg>
+      </button>
+      <button class="mute-btn" aria-label="Toggle mute">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+        </svg>
+      </button>
+      <canvas id="output-canvas"></canvas>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="presets">Presets</button>
+      <button class="tab" data-tab="random">Random</button>
+      <button class="tab" data-tab="kaleidoscope">Kaleidoscope</button>
+      <button class="tab" data-tab="puzzles">Puzzles</button>
+      <button class="tab" data-tab="basic">Basic Effects</button>
+      <button class="tab" data-tab="motion">Motion Effects</button>
+      <button class="tab" data-tab="convolution">Convolution Effects</button>
+      <button class="tab" data-tab="special">Special Effects</button>
+      <button class="tab" data-tab="mind-bending">Mind-Bending Effects</button>
+      <button class="tab" data-tab="crt">CRT Effects</button>
+      <button class="tab" data-tab="flip">Flip & Rotate</button>
+      <button class="tab" data-tab="playback">Playback Effects</button>
+      <button class="tab" data-tab="transform">Transform Effects</button>
+      <button class="tab" data-tab="pixelation">Pixelation Effects</button>
+      <button class="tab" data-tab="color">Color Effects</button>
+      <button class="tab" data-tab="webgl-shader">WebGL Shader</button>
+      <button class="tab" data-tab="audio">Audio Effects</button>
+      <button class="tab" data-tab="liquids">Liquids</button>
+      <button id="reset-btn" class="reset-btn">Reset All Effects</button>
+      <button id="save-video-btn" class="reset-btn">Save Video</button>
+    </div>
+
+    <!-- Presets Section -->
+    <div class="controls active" data-controls="presets">
+      <button class="preset-btn" data-preset="retro-tv">
+        <h3>Retro TV</h3>
+        <p>Classic CRT television with scan lines and color distortion</p>
+      </button>
+
+      <button class="preset-btn" data-preset="quantum-reality">
+        <h3>Quantum Reality</h3>
+        <p>Mind-bending quantum effects and particle distortions</p>
+      </button>
+
+      <button class="preset-btn" data-preset="glitch-art">
+        <h3>Glitch Art</h3>
+        <p>Digital artifacts and RGB shifts create artistic glitches</p>
+      </button>
+
+      <button class="preset-btn" data-preset="psychedelic-dream">
+        <h3>Psychedelic Dream</h3>
+        <p>Colorful swirling patterns and reality-bending effects</p>
+      </button>
+
+      <button class="preset-btn" data-preset="vhs-memories">
+        <h3>VHS Memories</h3>
+        <p>Vintage video tape aesthetic with tracking issues</p>
+      </button>
+
+      <button class="preset-btn" data-preset="mirror-dimension">
+        <h3>Mirror Dimension</h3>
+        <p>kaleidoscopic reflections and dimensional shifts</p>
+      </button>
+
+      <button class="preset-btn" data-preset="time-warp">
+        <h3>Time Warp</h3>
+        <p>Temporal distortions and reality-warping effects</p>
+      </button>
+
+      <button class="preset-btn" data-preset="digital-decay">
+        <h3>Digital Decay</h3>
+        <p>Corrupted data aesthetic with pixelation and artifacts</p>
+      </button>
+
+      <button class="preset-btn" data-preset="cosmic-portal">
+        <h3>Cosmic Portal</h3>
+        <p>Step through a mesmerizing interdimensional gateway</p>
+      </button>
+
+      <button class="preset-btn" data-preset="neural-network">
+        <h3>Neural Network</h3>
+        <p>Visual representation of AI consciousness and digital synapses</p>
+      </button>
+
+      <button class="preset-btn" data-preset="dimensional-rift">
+        <h3>Dimensional Rift</h3>
+        <p>Tear through the fabric of reality with intense dimensional effects</p>
+      </button>
+
+      <button class="preset-btn" data-preset="cybernetic-dream">
+        <h3>Cybernetic Dream</h3>
+        <p>Futuristic blend of digital and organic visual patterns</p>
+      </button>
+    </div>
+
+    <!-- Random Effects Section -->
+    <div class="controls" data-controls="random">
+      <div class="control-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="random-enable">
+          <label for="random-enable">Enable Random Effects</label>
+        </div>
+      </div>
+      <div>
+        <div class="control-group" style="margin-top: 25px; margin-bottom: 25px;">
+          <label>Change Interval <span class="value">1s</span></label>
+          <input type="range" id="random-interval" min="100" max="5000" value="1000">
+        </div>
+
+        <div class="control-group" style="margin-top: 25px; margin-bottom: 25px;">
+          <label>Effect Intensity Range <span class="value">50%</span></label>
+          <input type="range" id="random-intensity" min="0" max="100" value="50">
+        </div>
+
+        <div class="control-group" style="margin-top: 25px; margin-bottom: 25px;">
+          <label>Number of Active Effects <span class="value">3</span></label>
+          <input type="range" id="random-active-effects" min="1" max="10" value="3">
+        </div>
+
+        <div class="control-group" style="margin-top: 25px; margin-bottom: 25px;">
+          <label>Transition Speed <span class="value">500ms</span></label>
+          <input type="range" id="random-transition" min="0" max="2000" value="500">
+        </div>
+      </div>
+      <div class="control-group">
+        <label>Effect Categories</label>
+        <div class="random-categories">
+          <div class="checkbox-group">
+            <input type="checkbox" id="random-basic" checked>
+            <label for="random-basic">Basic Effects</label>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="random-motion" checked>
+            <label for="random-motion">Motion Effects</label>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="random-special" checked>
+            <label for="random-special">Special Effects</label>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="random-mind-bending" checked>
+            <label for="random-mind-bending">Mind-Bending</label>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="random-color" checked>
+            <label for="random-color">Color Effects</label>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="random-convolution" checked>
+            <label for="random-convolution">Convolution</label>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="random-crt" checked>
+            <label for="random-crt">CRT Effects</label>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="random-flip" checked>
+            <label for="random-flip">Flip & Rotate</label>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="random-playback" checked>
+            <label for="random-playback">Playback</label>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="random-transform" checked>
+            <label for="random-transform">Transform</label>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="random-pixelation" checked>
+            <label for="random-pixelation">Pixelation</label>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="random-color" checked>
+            <label for="random-color">Color</label>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="random-kaleidoscope" checked>
+            <label for="random-kaleidoscope">Kaleidoscope</label>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="random-puzzles" checked>
+            <label for="random-puzzles">Puzzles</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kaleidoscope Effects Section -->
+    <div class="controls" data-controls="kaleidoscope">
+      <div class="control-group">
+        <label>Basic Segments <span class="value">0</span></label>
+        <input type="range" id="kaleidoscope" min="0" max="32" value="0">
+      </div>
+      
+      <div class="control-group">
+        <label>Dry-Cell Effect <span class="value">0%</span></label>
+        <input type="range" id="kaleidoscope-drycell" min="0" max="100" value="0">
+      </div>
+      
+      <div class="control-group">
+        <label>Dry-Cell Rotation <span class="value">0°</span></label>
+        <input type="range" id="kaleidoscope-drycell-rotation" min="0" max="360" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Oil-Wheel Flow <span class="value">0%</span></label>
+        <input type="range" id="kaleidoscope-oilwheel" min="0" max="100" value="0">
+      </div>
+      
+      <div class="control-group">
+        <label>Oil-Wheel Viscosity <span class="value">0%</span></label>
+        <input type="range" id="kaleidoscope-oilwheel-viscosity" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Teleidoscope Intensity <span class="value">0%</span></label>
+        <input type="range" id="kaleidoscope-teleidoscope" min="0" max="100" value="0">
+      </div>
+      
+      <div class="control-group">
+        <label>Teleidoscope Zoom <span class="value">100%</span></label>
+        <input type="range" id="kaleidoscope-teleidoscope-zoom" min="50" max="200" value="100">
+      </div>
+
+      <div class="control-group">
+        <label>Wheel Speed <span class="value">0</span></label>
+        <input type="range" id="kaleidoscope-wheel-speed" min="0" max="100" value="0">
+      </div>
+      
+      <div class="control-group">
+        <label>Wheel Pattern <span class="value">0</span></label>
+        <input type="range" id="kaleidoscope-wheel-pattern" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Marblescope Distortion <span class="value">0%</span></label>
+        <input type="range" id="kaleidoscope-marble" min="0" max="100" value="0">
+      </div>
+      
+      <div class="control-group">
+        <label>Marble Size <span class="value">100%</span></label>
+        <input type="range" id="kaleidoscope-marble-size" min="50" max="200" value="100">
+      </div>
+    </div>
+
+    <!-- Puzzles Section -->
+    <div class="controls" data-controls="puzzles">
+      <div class="control-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="puzzle-enable">
+          <label for="puzzle-enable">Enable Puzzle Effects</label>
+        </div>
+      </div>
+
+      <div class="control-group puzzle-control">
+        <label>Puzzle Pieces <span class="value">0</span></label>
+        <input type="range" id="puzzle-pieces" min="2" max="20" value="0">
+      </div>
+
+      <div class="control-group puzzle-control">
+        <label>Piece Rotation <span class="value">0°</span></label>
+        <input type="range" id="puzzle-rotation" min="0" max="360" value="0">
+      </div>
+
+      <div class="control-group puzzle-control">
+        <label>Piece Scatter <span class="value">0%</span></label>
+        <input type="range" id="puzzle-scatter" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group puzzle-control">
+        <label>Piece Scale <span class="value">100%</span></label>
+        <input type="range" id="puzzle-scale" min="50" max="150" value="100">
+      </div>
+
+      <div class="control-group puzzle-control">
+        <label>Edge Glow <span class="value">0%</span></label>
+        <input type="range" id="puzzle-edge-glow" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group puzzle-control">
+        <label>3D Depth <span class="value">0%</span></label>
+        <input type="range" id="puzzle-depth" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group puzzle-control">
+        <label>Animation Speed <span class="value">0%</span></label>
+        <input type="range" id="puzzle-animation-speed" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group puzzle-control">
+        <label>Pattern Style</label>
+        <select id="puzzle-pattern">
+          <option value="classic">Classic Grid</option>
+          <option value="spiral">Spiral</option>
+          <option value="radial">Radial</option>
+          <option value="honeycomb">Honeycomb</option>
+          <option value="voronoi">Voronoi</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Basic Effects -->
+    <div class="controls" data-controls="basic">
+      <div class="control-group">
+        <label>Wave Amplitude <span class="value">0%</span></label>
+        <input type="range" id="wave-amplitude" min="0" max="100" value="0">
+      </div>
+      
+      <div class="control-group">
+        <label>Wave Frequency <span class="value">0</span></label>
+        <input type="range" id="wave-frequency" min="0" max="50" value="0">
+      </div>
+      
+      <div class="control-group">
+        <label>Twist Amount <span class="value">0%</span></label>
+        <input type="range" id="twist" min="0" max="100" value="0">
+      </div>
+      
+      <div class="control-group">
+        <label>RGB Shift <span class="value">0px</span></label>
+        <input type="range" id="rgb-shift" min="0" max="50" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Swirl <span class="value">0°</span></label>
+        <input type="range" id="swirl" min="0" max="360" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Saturation <span class="value">100%</span></label>
+        <input type="range" id="saturation" min="0" max="200" value="100">
+      </div>
+
+      <div class="control-group">
+        <label>Hue Rotation <span class="value">0°</span></label>
+        <input type="range" id="hue-rotate" min="0" max="360" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Color Cycle Speed <span class="value">0</span></label>
+        <input type="range" id="color-cycle-speed" min="0" max="100" value="0">
+      </div>
+    </div>
+
+    <!-- Pixelation Effects -->
+    <div class="controls" data-controls="pixelation">
+      <div class="control-group">
+        <label>Classic Pixelation <span class="value">Native</span></label>
+        <input type="range" id="pixelate" min="1" max="1920" value="1920">
+      </div>
+      
+      <div class="control-group">
+        <label>Quantum Pixelation <span class="value">0%</span></label>
+        <input type="range" id="quantum-pixelate" min="0" max="100" value="0">
+      </div>
+      <div class="control-group">
+        <label>Particle Pixelation <span class="value">0%</span></label>
+        <input type="range" id="particle-pixelate" min="0" max="100" value="0">
+      </div>
+    </div>
+
+    <!-- Motion Effects -->
+    <div class="controls" data-controls="motion">
+      <div class="control-group">
+        <label>Ghost Amount <span class="value">0%</span></label>
+        <input type="range" id="ghost-amount" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Trail Length <span class="value">0%</span></label>
+        <input type="range" id="trail-length" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Zoom <span class="value">0%</span></label>
+        <input type="range" id="zoom" min="-100" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Spiral Zoom <span class="value">0%</span></label>
+        <input type="range" id="spiral-zoom" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Wave Motion <span class="value">0%</span></label>
+        <input type="range" id="wave-motion" min="0" max="100" value="0">
+      </div>
+    </div>
+
+    <!-- Convolution Effects -->
+    <div class="controls" data-controls="convolution">
+      <div class="control-group">
+        <label>Sharpen <span class="value">0%</span></label>
+        <input type="range" id="sharpen" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Emboss <span class="value">0%</span></label>
+        <input type="range" id="emboss" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Blur <span class="value">0%</span></label>
+        <input type="range" id="blur" min="0" max="100" value="0">
+      </div>
+    </div>
+
+    <!-- Special Effects -->
+    <div class="controls" data-controls="special">
+      <div class="control-group">
+        <label>Film Grain <span class="value">0%</span></label>
+        <input type="range" id="film-grain" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Digital Noise <span class="value">0%</span></label>
+        <input type="range" id="digital-noise" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Color Noise <span class="value">0%</span></label>
+        <input type="range" id="color-noise" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Quantum Noise <span class="value">0%</span></label>
+        <input type="range" id="quantum-noise" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Noise Reduction <span class="value">0%</span></label>
+        <input type="range" id="noise-reduction" min="0" max="100" value="0">
+      </div>
+      
+      <div class="control-group">
+        <label>Static Amount <span class="value">0%</span></label>
+        <input type="range" id="static-amount" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>VHS Tracking <span class="value">0%</span></label>
+        <input type="range" id="vhs-tracking" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Horizontal Lines <span class="value">0%</span></label>
+        <input type="range" id="horizontal-lines" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Vertical Lines <span class="value">0%</span></label>
+        <input type="range" id="vertical-lines" min="0" max="100" value="0">
+      </div>
+    </div>
+
+    <!-- Mind-Bending Effects -->
+    <div class="controls" data-controls="mind-bending">
+      <div class="control-group">
+        <label>Psychedelic Intensity <span class="value">0%</span></label>
+        <input type="range" id="psychedelic-intensity" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Time Warp <span class="value">0%</span></label>
+        <input type="range" id="time-warp" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Reality Glitch <span class="value">0%</span></label>
+        <input type="range" id="reality-glitch" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Black Hole <span class="value">0%</span></label>
+        <input type="range" id="black-hole" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Dimension Shift <span class="value">0%</span></label>
+        <input type="range" id="dimension-shift" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Reality Shatter <span class="value">0%</span></label>
+        <input type="range" id="reality-shatter" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Mirror Dimension <span class="value">0%</span></label>
+        <input type="range" id="mirror-dimension" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Quantum Tunnel <span class="value">0%</span></label>
+        <input type="range" id="quantum-tunnel" min="0" max="100" value="0">
+      </div>
+    </div>
+
+    <!-- CRT Effects -->
+    <div class="controls" data-controls="crt">
+      <div class="control-group">
+        <label>Vertical Hold <span class="value">0%</span></label>
+        <input type="range" id="v-hold" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Horizontal Hold <span class="value">0%</span></label>
+        <input type="range" id="h-hold" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Scan Lines <span class="value">0%</span></label>
+        <input type="range" id="scan-lines" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>CRT Bloom <span class="value">0%</span></label>
+        <input type="range" id="crt-bloom" min="0" max="100" value="0">
+      </div>
+    </div>
+
+    <!-- Flip & Rotate -->
+    <div class="controls" data-controls="flip">
+      <div class="checkbox-group">
+        <input type="checkbox" id="h-flip">
+        <label for="h-flip">Flip Horizontal</label>
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="v-flip">
+        <label for="v-flip">Flip Vertical</label>
+      </div>
+
+      <div class="control-group">
+        <label>Rotation <span class="value">0°</span></label>
+        <input type="range" id="rotation" min="0" max="360" value="0">
+      </div>
+    </div>
+
+    <!-- Playback Effects -->
+    <div class="controls" data-controls="playback">
+      <div class="control-group">
+        <label>Playback Lag <span class="value">0%</span></label>
+        <input type="range" id="playback-lag" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Time Jump <span class="value">0%</span></label>
+        <input type="range" id="time-jump" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Glitch Repeat <span class="value">0%</span></label>
+        <input type="range" id="glitch-repeat" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Time Shift <span class="value">0%</span></label>
+        <input type="range" id="time-shift" min="0" max="100" value="0">
+      </div>
+    </div>
+
+    <!-- Transform Effects -->
+    <div class="controls" data-controls="transform">
+      <div class="control-group">
+        <label>Pan X <span class="value">0%</span></label>
+        <input type="range" id="pan-x" min="-100" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Pan Y <span class="value">0%</span></label>
+        <input type="range" id="pan-y" min="-100" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Tilt X <span class="value">0°</span></label>
+        <input type="range" id="tilt-x" min="-45" max="45" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Tilt Y <span class="value">0°</span></label>
+        <input type="range" id="tilt-y" min="-45" max="45" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Skew X <span class="value">0°</span></label>
+        <input type="range" id="skew-x" min="-45" max="45" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Skew Y <span class="value">0°</span></label>
+        <input type="range" id="skew-y" min="-45" max="45" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Stretch X <span class="value">100%</span></label>
+        <input type="range" id="stretch-x" min="50" max="200" value="100">
+      </div>
+
+      <div class="control-group">
+        <label>Stretch Y <span class="value">100%</span></label>
+        <input type="range" id="stretch-y" min="50" max="200" value="100">
+      </div>
+    </div>
+
+    <!-- Color Effects -->
+    <div class="controls" data-controls="color">
+      <div class="control-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="monochrome-enable">
+          <label for="monochrome-enable">Enable Monochrome</label>
+        </div>
+        <div id="monochrome-controls" style="display: none; margin-top: 1rem;">
+          <label>Monochrome Color</label>
+          <input type="color" id="monochrome-color" value="#ffffff">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="black-and-white">
+          <label for="black-and-white">Black & White</label>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="sepia">
+          <label for="sepia">Sepia</label>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Color Banding <span class="value">0</span></label>
+        <input type="range" id="color-banding" min="0" max="32" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Posterize <span class="value">0</span></label>
+        <input type="range" id="posterize" min="0" max="32" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Duotone Intensity <span class="value">0%</span></label>
+        <input type="range" id="duotone-intensity" min="0" max="100" value="0">
+      </div>
+      <div class="duotone-colors" style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+        <input type="color" id="duotone-color1" value="#ff0000">
+        <input type="color" id="duotone-color2" value="#0000ff">
+      </div>
+
+      <div class="control-group">
+        <label>Negative <span class="value">0%</span></label>
+        <input type="range" id="negative" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Color Temperature <span class="value">0</span></label>
+        <input type="range" id="color-temperature" min="-100" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Color Cycling Speed <span class="value">0</span></label>
+        <input type="range" id="color-cycling-speed" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>RGB Channel Mix</label>
+        <select id="rgb-channel-mix">
+          <option value="normal">Normal</option>
+          <option value="rbg">RBG</option>
+          <option value="grb">GRB</option>
+          <option value="gbr">GBR</option>
+          <option value="brg">BRG</option>
+          <option value="bgr">BGR</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- WebGL Shader Effects -->
+    <div class="controls" data-controls="webgl-shader">
+      <div class="control-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="webgl-shader-enable">
+          <label for="webgl-shader-enable">Enable WebGL Shader Effects</label>
+        </div>
+        <div class="webgl-shader-controls">
+          <div class="control-group">
+            <label>Bloom Intensity <span class="value">0%</span></label>
+            <input type="range" id="bloom-intensity" min="0" max="100" value="0">
+          </div>
+
+          <div class="control-group">
+            <label>Edge Detection <span class="value">0%</span></label>
+            <input type="range" id="edge-detection" min="0" max="100" value="0">
+          </div>
+
+          <div class="control-group">
+            <label>Ripple Effect <span class="value">0%</span></label>
+            <input type="range" id="ripple-intensity" min="0" max="100" value="0">
+          </div>
+
+          <div class="control-group">
+            <label>Chromatic Aberration <span class="value">0%</span></label>
+            <input type="range" id="chromatic-aberration" min="0" max="100" value="0">
+          </div>
+
+          <div class="control-group">
+            <label>God Rays Intensity <span class="value">0%</span></label>
+            <input type="range" id="god-rays-intensity" min="0" max="100" value="0">
+          </div>
+          
+          <div class="control-group">
+            <label>Old Film Effect <span class="value">0%</span></label>
+            <input type="range" id="old-film-intensity" min="0" max="100" value="0">
+          </div>
+          
+          <div class="control-group">
+            <label>Fish Eye Distortion <span class="value">0%</span></label>
+            <input type="range" id="fish-eye-distortion" min="0" max="100" value="0">
+          </div>
+          
+          <div class="control-group">
+            <label>Vignette Intensity <span class="value">0%</span></label>
+            <input type="range" id="vignette-intensity" min="0" max="100" value="0">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audio Effects Section -->
+    <div class="controls" data-controls="audio">
+      <div class="control-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="audio-effects-enable">
+          <label for="audio-effects-enable">Enable Audio Effects</label>
+        </div>
+      </div>
+
+      <!-- Audio Band Controls -->
+      <div class="control-group">
+        <label>Low Band (Bass) <span class="value">0 dB</span></label>
+        <input type="range" id="audio-low-band" min="-12" max="12" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Mid Band <span class="value">0 dB</span></label>
+        <input type="range" id="audio-mid-band" min="-12" max="12" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>High Band (Treble) <span class="value">0 dB</span></label>
+        <input type="range" id="audio-high-band" min="-12" max="12" value="0">
+      </div>
+
+      <!-- Reverb Effect -->
+      <div class="control-group">
+        <label>Reverb Mix <span class="value">0%</span></label>
+        <input type="range" id="audio-reverb" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Room Size <span class="value">0.5</span></label>
+        <input type="range" id="audio-room-size" min="0" max="100" value="50">
+      </div>
+
+      <!-- Delay Effect -->
+      <div class="control-group">
+        <label>Delay Time <span class="value">0 ms</span></label>
+        <input type="range" id="audio-delay-time" min="0" max="1000" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Delay Feedback <span class="value">0%</span></label>
+        <input type="range" id="audio-delay-feedback" min="0" max="100" value="0">
+      </div>
+
+      <!-- Chorus Effect -->
+      <div class="control-group">
+        <label>Chorus Mix <span class="value">0%</span></label>
+        <input type="range" id="audio-chorus" min="0" max="100" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Chorus Rate <span class="value">0 Hz</span></label>
+        <input type="range" id="audio-chorus-rate" min="0" max="100" value="0">
+      </div>
+
+      <!-- Distortion Effect -->
+      <div class="control-group">
+        <label>Distortion <span class="value">0%</span></label>
+        <input type="range" id="audio-distortion" min="0" max="100" value="0">
+      </div>
+
+      <!-- Compression Effect -->
+      <div class="control-group">
+        <label>Compression Threshold <span class="value">-24 dB</span></label>
+        <input type="range" id="audio-compression" min="-60" max="0" value="-24">
+      </div>
+
+      <div class="control-group">
+        <label>Compression Ratio <span class="value">1:1</span></label>
+        <input type="range" id="audio-compression-ratio" min="1" max="20" value="1">
+      </div>
+    </div>
+    
+    <!-- New Liquids Effects Section -->
+    <div class="controls" data-controls="liquids">
+      <div class="control-group">
+        <label>Liquid Turbulence <span class="value">50</span></label>
+        <input type="range" id="liquid-turbulence" min="0" max="100" value="50">
+      </div>
+      <div class="control-group">
+        <label>Liquid Scale <span class="value">20</span></label>
+        <input type="range" id="liquid-scale" min="0" max="100" value="20">
+      </div>
+      <div class="control-group">
+        <label>Liquid Frequency <span class="value">2</span></label>
+        <input type="range" id="liquid-frequency" min="0" max="10" step="0.1" value="2">
+      </div>
+      <div class="control-group">
+        <label>Liquid Speed <span class="value">20</span></label>
+        <input type="range" id="liquid-speed" min="0" max="100" value="20">
+      </div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+  <script src="app.js"></script>
+  <script src="liquids.js"></script>
+  <script src="saveVideo.js"></script>
+</body>
+</html>
