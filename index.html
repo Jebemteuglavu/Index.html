@@ -1,0 +1,77 @@
+<html>
+<head>
+  <title>2Floppy2Die</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.18.0/matter.min.js"></script>
+  <!-- Add font loading -->
+  <style>
+    @font-face {
+      font-family: 'ARCADE_N';
+      src: url('ARCADE_N.TTF') format('truetype');
+    }
+  </style>
+  <!-- Force font loading -->
+  <script>
+    document.fonts.load('12px ARCADE_N').then(() => {
+      console.log('ARCADE_N font loaded');
+    });
+  </script>
+  <!-- Preload audio -->
+  <link rel="preload" href="gun-fire.mp3" as="audio">
+  <link rel="preload" href="dasher-dash.mp3" as="audio">
+  <link rel="preload" href="dasher-die.mp3" as="audio">
+  <link rel="preload" href="robot-die.mp3" as="audio">
+  <!-- Preload heal image -->
+  <link rel="preload" href="heal.png" as="image">
+  <!-- Preload font -->
+  <link rel="preload" href="ARCADE_N.TTF" as="font" type="font/ttf" crossorigin>
+</head>
+<body>
+  <div id="loading-screen">
+    <img src="2floppy2die.png" alt="2FLOPPY2DIE" class="loading-title-image">
+    <div class="loading-bar-container">
+      <div class="loading-bar"></div>
+    </div>
+    <div class="instructions">
+      <div class="controls-section">
+        <div class="controls-column">
+          <div class="control-item">Movement:</div>
+          <div class="control-item"><span class="key">A</span> <span class="key">D</span> Move left/right</div>
+          <div class="control-item"><span class="key">W</span> or <span class="key">SPACE</span> Jump/Double jump</div>
+          <div class="control-item"><span class="key">SHIFT</span> Dash forwards</div>
+        </div>
+        <div class="controls-column">
+          <div class="control-item">Combat:</div>
+          <div class="control-item"><span class="key">Mouse</span> Aim</div>
+          <div class="control-item"><span class="key">Left Click</span> Shoot</div>
+          <div class="control-item"><span class="key">R</span> Restart game</div>
+        </div>
+      </div>
+      <div>Shoot down enemies, survive for as long as you can and use props to your advantage!</div>
+      <div>Collect / Shoot health pickups to heal yourself!</div>
+    </div>
+    <div class="press-space">Insert 25¢ and press SPACE to play!</div>
+  </div>
+  <div id="game-container">
+    <canvas id="grid-canvas"></canvas>
+    <canvas id="game-canvas"></canvas>
+    <canvas id="hud-canvas"></canvas>
+    <div id="health-container">
+      <div id="health-bar"></div>
+    </div>
+  </div>
+  <div id="game-over">
+    <img src="gameover.png" alt="GAME OVER" class="game-over-image">
+    <div class="stats">
+      <div>Final Score: <span id="final-kills">0</span> kills</div>
+      <div>Best Score: <span id="best-kills">0</span> kills</div>
+    </div>
+    <div class="leaderboard">
+      <h2>TOP KILLERS</h2>
+      <div id="leaderboard-entries"></div>
+    </div>
+    <button onclick="window.game.restart()">RESTART</button>
+  </div>
+  <script type="module" src="scripts/main.js"></script>
+</body>
+</html>
