@@ -1,0 +1,484 @@
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(45deg, #000000, #0f1724, #1a2332);
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .container {
+    max-width: 1200px;
+    width: 100%;
+    padding: 2rem;
+  }
+  h1 {
+    text-align: center;
+    font-size: 3rem;
+    margin-bottom: 2rem;
+    text-shadow: 0 0 10px #4a90e2, 0 0 20px #4a90e2, 0 0 30px #4a90e2;
+  }
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+  }
+  .tool-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(74, 144, 226, 0.3);
+    cursor: pointer;
+  }
+  .tool-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 0 25px rgba(74, 144, 226, 0.5);
+  }
+  .tool-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #4a90e2;
+  }
+  h2 {
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+  }
+  p {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    color: #cccccc;
+  }
+  @keyframes glow {
+    0% {
+      box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(74, 144, 226, 0.6);
+    }
+    100% {
+      box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
+    }
+  }
+  .tool-card {
+    animation: glow 3s infinite;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+  }
+  .modal-content {
+    background-color: #1a2332;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #4a90e2;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 15px;
+    box-shadow: 0 0 25px rgba(74, 144, 226, 0.5);
+  }
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  .close:hover,
+  .close:focus {
+    color: #4a90e2;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  input, select, button {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #4a90e2;
+    background-color: #0f1724;
+    color: #ffffff;
+  }
+  button {
+    background-color: #4a90e2;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background-color: #357abd;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>NightTools</h1>
+    <div class="tools-grid">
+      <div class="tool-card" data-tool="timezone">
+        <div class="tool-icon">⏰</div>
+        <h2>Time Zone Converter</h2>
+        <p>Convert time across different time zones effortlessly.</p>
+      </div>
+      <div class="tool-card" data-tool="unit">
+        <div class="tool-icon">🧮</div>
+        <h2>Unit Converter</h2>
+        <p>Convert between various units of measurement with ease.</p>
+      </div>
+      <div class="tool-card" data-tool="date">
+        <div class="tool-icon">📅</div>
+        <h2>Date Calculator</h2>
+        <p>Calculate days between dates or add/subtract days from a date.</p>
+      </div>
+      <div class="tool-card" data-tool="currency">
+        <div class="tool-icon">💰</div>
+        <h2>Currency Converter</h2>
+        <p>Get real-time currency conversion rates for global currencies.</p>
+      </div>
+      <div class="tool-card" data-tool="note">
+        <div class="tool-icon">📝</div>
+        <h2>Note Taker</h2>
+        <p>Quickly jot down and organize your thoughts and ideas.</p>
+      </div>
+      <div class="tool-card" data-tool="color">
+        <div class="tool-icon">🎨</div>
+        <h2>Color Picker</h2>
+        <p>Select and save colors with their corresponding hex codes.</p>
+      </div>
+      <div class="tool-card" data-tool="random">
+        <div class="tool-icon">🔢</div>
+        <h2>Random Number Generator</h2>
+        <p>Generate random numbers within a specified range.</p>
+      </div>
+      <div class="tool-card" data-tool="percentage">
+        <div class="tool-icon">📊</div>
+        <h2>Percentage Calculator</h2>
+        <p>Calculate percentages and perform percentage-based operations.</p>
+      </div>
+      <div class="tool-card" data-tool="password">
+        <div class="tool-icon">🔒</div>
+        <h2>Password Generator</h2>
+        <p>Create strong, secure passwords with custom parameters.</p>
+      </div>
+      <div class="tool-card" data-tool="bmi">
+        <div class="tool-icon">📏</div>
+        <h2>BMI Calculator</h2>
+        <p>Calculate your Body Mass Index (BMI) and get health insights.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2 id="modal-title"></h2>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const toolCards = document.querySelectorAll('.tool-card');
+  const modal = document.getElementById('modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalBody = document.getElementById('modal-body');
+  const closeBtn = document.getElementsByClassName('close')[0];
+
+  toolCards.forEach(card => {
+    card.addEventListener('mouseover', () => {
+      card.style.animation = 'none';
+      card.style.boxShadow = '0 0 25px rgba(74, 144, 226, 0.5)';
+    });
+    
+    card.addEventListener('mouseout', () => {
+      card.style.animation = 'glow 3s infinite';
+    });
+
+    card.addEventListener('click', () => {
+      const tool = card.getAttribute('data-tool');
+      openTool(tool);
+    });
+  });
+
+  closeBtn.onclick = () => {
+    modal.style.display = "none";
+  }
+
+  window.onclick = (event) => {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
+
+  function openTool(tool) {
+    modalTitle.textContent = document.querySelector(`[data-tool="${tool}"] h2`).textContent;
+    modalBody.innerHTML = '';
+
+    switch(tool) {
+      case 'timezone':
+        modalBody.innerHTML = `
+          <input type="datetime-local" id="datetime">
+          <select id="fromTimezone">
+            <option value="UTC">UTC</option>
+            <option value="America/New_York">New York</option>
+            <option value="Europe/London">London</option>
+            <option value="Asia/Tokyo">Tokyo</option>
+          </select>
+          <select id="toTimezone">
+            <option value="UTC">UTC</option>
+            <option value="America/New_York">New York</option>
+            <option value="Europe/London">London</option>
+            <option value="Asia/Tokyo">Tokyo</option>
+          </select>
+          <button onclick="convertTimezone()">Convert</button>
+          <p id="result"></p>
+        `;
+        break;
+      case 'unit':
+        modalBody.innerHTML = `
+          <input type="number" id="fromValue" placeholder="Enter value">
+          <select id="fromUnit">
+            <option value="m">Meters</option>
+            <option value="ft">Feet</option>
+            <option value="km">Kilometers</option>
+            <option value="mi">Miles</option>
+          </select>
+          <select id="toUnit">
+            <option value="m">Meters</option>
+            <option value="ft">Feet</option>
+            <option value="km">Kilometers</option>
+            <option value="mi">Miles</option>
+          </select>
+          <button onclick="convertUnit()">Convert</button>
+          <p id="result"></p>
+        `;
+        break;
+      case 'date':
+        modalBody.innerHTML = `
+          <input type="date" id="startDate">
+          <input type="date" id="endDate">
+          <button onclick="calculateDays()">Calculate Days</button>
+          <p id="result"></p>
+        `;
+        break;
+      case 'currency':
+        modalBody.innerHTML = `
+          <input type="number" id="amount" placeholder="Enter amount">
+          <select id="fromCurrency">
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+            <option value="JPY">JPY</option>
+          </select>
+          <select id="toCurrency">
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+            <option value="JPY">JPY</option>
+          </select>
+          <button onclick="convertCurrency()">Convert</button>
+          <p id="result"></p>
+        `;
+        break;
+      case 'note':
+        modalBody.innerHTML = `
+          <textarea id="noteText" rows="5" placeholder="Enter your note here"></textarea>
+          <button onclick="saveNote()">Save Note</button>
+          <div id="savedNotes"></div>
+        `;
+        loadNotes();
+        break;
+      case 'color':
+        modalBody.innerHTML = `
+          <input type="color" id="colorPicker">
+          <p id="hexCode"></p>
+          <button onclick="copyHexCode()">Copy Hex Code</button>
+        `;
+        setupColorPicker();
+        break;
+      case 'random':
+        modalBody.innerHTML = `
+          <input type="number" id="minNumber" placeholder="Minimum number">
+          <input type="number" id="maxNumber" placeholder="Maximum number">
+          <button onclick="generateRandomNumber()">Generate</button>
+          <p id="result"></p>
+        `;
+        break;
+      case 'percentage':
+        modalBody.innerHTML = `
+          <input type="number" id="percentValue" placeholder="Percentage">
+          <input type="number" id="totalValue" placeholder="Total value">
+          <button onclick="calculatePercentage()">Calculate</button>
+          <p id="result"></p>
+        `;
+        break;
+      case 'password':
+        modalBody.innerHTML = `
+          <input type="number" id="passwordLength" placeholder="Password length" min="8" max="32" value="12">
+          <button onclick="generatePassword()">Generate Password</button>
+          <p id="result"></p>
+        `;
+        break;
+      case 'bmi':
+        modalBody.innerHTML = `
+          <input type="number" id="weight" placeholder="Weight (kg)">
+          <input type="number" id="height" placeholder="Height (cm)">
+          <button onclick="calculateBMI()">Calculate BMI</button>
+          <p id="result"></p>
+        `;
+        break;
+    }
+
+    modal.style.display = "block";
+  }
+
+  // Tool functions
+  window.convertTimezone = () => {
+    const datetime = document.getElementById('datetime').value;
+    const fromTz = document.getElementById('fromTimezone').value;
+    const toTz = document.getElementById('toTimezone').value;
+    const date = new Date(datetime);
+    const options = { timeZone: toTz, hour12: false, hour: '2-digit', minute: '2-digit' };
+    const convertedTime = date.toLocaleString('en-US', options);
+    document.getElementById('result').textContent = `Converted time: ${convertedTime}`;
+  }
+
+  window.convertUnit = () => {
+    const fromValue = parseFloat(document.getElementById('fromValue').value);
+    const fromUnit = document.getElementById('fromUnit').value;
+    const toUnit = document.getElementById('toUnit').value;
+    let result;
+
+    const conversions = {
+      m: { ft: 3.28084, km: 0.001, mi: 0.000621371 },
+      ft: { m: 0.3048, km: 0.0003048, mi: 0.000189394 },
+      km: { m: 1000, ft: 3280.84, mi: 0.621371 },
+      mi: { m: 1609.34, ft: 5280, km: 1.60934 }
+    };
+
+    if (fromUnit === toUnit) {
+      result = fromValue;
+    } else {
+      result = fromValue * conversions[fromUnit][toUnit];
+    }
+
+    document.getElementById('result').textContent = `${fromValue} ${fromUnit} = ${result.toFixed(2)} ${toUnit}`;
+  }
+
+  window.calculateDays = () => {
+    const startDate = new Date(document.getElementById('startDate').value);
+    const endDate = new Date(document.getElementById('endDate').value);
+    const diffTime = Math.abs(endDate - startDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    document.getElementById('result').textContent = `Days between dates: ${diffDays}`;
+  }
+
+  window.convertCurrency = () => {
+    const amount = parseFloat(document.getElementById('amount').value);
+    const fromCurrency = document.getElementById('fromCurrency').value;
+    const toCurrency = document.getElementById('toCurrency').value;
+    // Note: In a real application, you would use an API to get live exchange rates
+    const exchangeRates = {
+      USD: { EUR: 0.84, GBP: 0.72, JPY: 110.12 },
+      EUR: { USD: 1.19, GBP: 0.86, JPY: 131.10 },
+      GBP: { USD: 1.39, EUR: 1.16, JPY: 152.45 },
+      JPY: { USD: 0.0091, EUR: 0.0076, GBP: 0.0066 }
+    };
+    let result;
+    if (fromCurrency === toCurrency) {
+      result = amount;
+    } else {
+      result = amount * exchangeRates[fromCurrency][toCurrency];
+    }
+    document.getElementById('result').textContent = `${amount} ${fromCurrency} = ${result.toFixed(2)} ${toCurrency}`;
+  }
+
+  window.saveNote = () => {
+    const noteText = document.getElementById('noteText').value;
+    if (noteText) {
+      let notes = JSON.parse(localStorage.getItem('notes') || '[]');
+      notes.push(noteText);
+      localStorage.setItem('notes', JSON.stringify(notes));
+      loadNotes();
+      document.getElementById('noteText').value = '';
+    }
+  }
+
+  function loadNotes() {
+    const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+    const savedNotesDiv = document.getElementById('savedNotes');
+    savedNotesDiv.innerHTML = '<h3>Saved Notes:</h3>';
+    notes.forEach((note, index) => {
+      savedNotesDiv.innerHTML += `<p>${note} <button onclick="deleteNote(${index})">Delete</button></p>`;
+    });
+  }
+
+  window.deleteNote = (index) => {
+    let notes = JSON.parse(localStorage.getItem('notes') || '[]');
+    notes.splice(index, 1);
+    localStorage.setItem('notes', JSON.stringify(notes));
+    loadNotes();
+  }
+
+  function setupColorPicker() {
+    const colorPicker = document.getElementById('colorPicker');
+    const hexCode = document.getElementById('hexCode');
+    colorPicker.addEventListener('input', () => {
+      hexCode.textContent = colorPicker.value;
+    });
+  }
+
+  window.copyHexCode = () => {
+    const hexCode = document.getElementById('hexCode').textContent;
+    navigator.clipboard.writeText(hexCode).then(() => {
+      alert('Hex code copied to clipboard!');
+    });
+  }
+
+  window.generateRandomNumber = () => {
+    const min = parseInt(document.getElementById('minNumber').value);
+    const max = parseInt(document.getElementById('maxNumber').value);
+    const result = Math.floor(Math.random() * (max - min + 1)) + min;
+    document.getElementById('result').textContent = `Random number: ${result}`;
+  }
+
+  window.calculatePercentage = () => {
+    const percent = parseFloat(document.getElementById('percentValue').value);
+    const total = parseFloat(document.getElementById('totalValue').value);
+    const result = (percent / 100) * total;
+    document.getElementById('result').textContent = `${percent}% of ${total} is ${result.toFixed(2)}`;
+  }
+
+  window.generatePassword = () => {
+    const length = parseInt(document.getElementById('passwordLength').value);
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
+    let password = "";
+    for (let i = 0; i < length; i++) {
+      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    document.getElementById('result').textContent = `Generated password: ${password}`;
+  }
+
+  window.calculateBMI = () => {
+    const weight = parseFloat(document.getElementById('weight').value);
+    const height = parseFloat(document.getElementById('height').value) / 100; // convert cm to m
+    const bmi = weight / (height * height);
+    let category;
+    if (bmi < 18.5) category = "Underweight";
+    else if (bmi < 25) category = "Normal weight";
+    else if (bmi < 30) category = "Overweight";
+    else category = "Obese";
+    document.getElementById('result').textContent = `Your BMI is ${bmi.toFixed(1)} (${category})`;
+  }
+});
+</script>
+</body></html>
